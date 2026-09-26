@@ -1,131 +1,100 @@
-# 🌾 NetBhav — Mandi Opportunity Agent
+# 🌾 NetBhav — Mandi Opportunity Agent (PS-02)
 
 **The best mandi isn't the one with the highest price — it's the one that puts the most money in your pocket.**
 
-> PS-02: Mandi Opportunity Agent. A farmer chases the highest sticker price; the road, the commission and the fees quietly eat the difference. NetBhav does the honest math — **net realization = price − transport − commission − mandi fees** — and ranks every nearby mandi by what you'd actually take home, in Hindi, on any phone.
+NetBhav does the honest math — **net realization = price − transport − commission − mandi fee − cess − hamali − spoilage** — and ranks every nearby mandi by what a farmer would actually *take home*, in Hindi, on any phone.
 
-## The ₹9,500 that hides in plain sight
+Live demo: https://netbhav.vercel.app · Region: central-UP (Awadh) belt around Lucknow.
 
-Real numbers from this app (50 quintal mustard, farmer near Lucknow):
+---
 
-| Mandi | Sticker price | Distance | **Take-home** |
-|---|---|---|---|
-| Shahjahanpur | ₹5,540/qtl ⬅ *highest price* | ~198 km | ₹2,52,129 |
-| **Lucknow (Sitapur Rd)** | ₹5,450/qtl | ~24 km | **₹2,61,686** ⬅ *best take-home* |
+## The problem (PS-02)
 
-Chasing the highest price would cost this farmer **₹9,556**. Same crop. Smarter mandi.
+Farmers decide where to sell using fragmented mandi price boards. A higher sticker price often earns *less* once transport, commission and fees are subtracted. NetBhav takes a farmer's **crop + quantity + location**, pulls **live mandi prices from multiple sources**, computes **transport + all deductions**, and returns a **ranked shortlist by real take-home** plus one clear recommendation — and how many ₹ it beats the naive "chase the highest price" choice.
 
-And it's not a rule of thumb — type any crop (Hindi or English, typos welcome) and the app does the real math every time. For a high-value, storable crop it will happily send you the long haul when the price gap dwarfs the transport; for a perishable it won't. Not a slogan — the math, every time.
+Example (50 quintal mustard, near Lucknow): highest sticker at Shahjahanpur (~198 km) nets **₹2,52,129**; nearby Lucknow (~24 km) nets **₹2,61,686** — chasing the sticker price loses **₹9,556**.
 
-## What it does (PS-02 MVP — all of it)
+## Approach
 
-- ✅ **Farmer/crop profile** — crop, quantity, location (typed, geolocated, or spoken)
-- ✅ **Market-price data source** — Agmarknet (data.gov.in) live, cache-first, with bundled reference fallback
-- ✅ **Nearby mandi comparison** — 18 real APMC yards across the central-UP (Awadh) belt
-- ✅ **Any crop, no fixed list** — fuzzy search resolves Hindi/English/typos (गेहूं, aloo, sarson…) to the right commodity
-- ✅ **Transport-cost calculation** — distance × per-km hire, trips for load size, round-trip aware
-- ✅ **Net realization comparison** — every deduction shown, to the rupee
-- ✅ **Clear recommendation** — one SELL verdict + the ₹ you gain over the naive choice
+- A **pure-TypeScript, unit-tested engine** does every rupee (distance → freight → class-aware commission → mandi fee/cess/hamali → distance-scaled spoilage → net realization → ranking). The LLM never touches a number.
+- A **cache-first, multi-source price layer** (live → reference) that never blocks the farmer on a slow government API.
+- A **conversational layer** (text chat, Hindi voice, WhatsApp, phone call) that only does *language* — it extracts intent, then the deterministic engine answers.
+- **Graceful degradation everywhere**: zero paid keys required to run; every dependency has a fallback.
 
-### Bonus — every one
-
-- ✅ **Historical price trends** — 30-day trend chart per mandi
-- ✅ **Multiple data sources** — live Agmarknet + cache + reference seed, with a freshness badge
-- ✅ **Map visualization** — Leaflet map, mandis colored by take-home, route to the best
-- ✅ **FPO / bulk-selling mode** — pool into full truckloads, per-quintal transport drops
-- ✅ **Hindi / Indic language** — full Hindi UI + a Hindi-speaking voice/chat agent
+---
 
 ## Run it (zero keys required)
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+npm run dev        # http://localhost:3000  (functional tool at /app)
 ```
-
-The app works completely offline of any paid service: bundled reference prices,
-a rule-based intent parser, and the browser's own speech engine. Add API keys
-(see `.env.example`) only to light up live Agmarknet prices and an LLM agent.
 
 ```bash
-npm test           # engine + agent unit tests (deterministic money math)
+npm test           # 31 engine + agent + store tests (deterministic money math)
 npm run build      # production build
+npm run agent      # (optional) LiveKit voice agent worker — needs LIVEKIT_* keys
 ```
 
-## Try these
+All keys are **optional** — see `.env.example`. Without any keys: reference prices + rule-based intent parser + browser voice. Keys just light up live prices, an LLM agent, WhatsApp, phone calls, and cloud persistence.
 
-- Type: **crop → quantity → location**, tap *Find best mandi*.
-- Tap the mic in the chat bubble and say *"लखनऊ में 50 क्विंटल गेहूं"* or *"50 quintal wheat at Lucknow"*.
-- Toggle **हिंदी / EN** top-right. Toggle **FPO / bulk mode**. Expand any mandi for the full math + trend.
-- WhatsApp: point a Twilio sandbox webhook at `POST /api/whatsapp`.
+---
 
-## How it works
+## What's working — features
 
-```
-crop + qty + location
-      │
-      ▼
- ┌─────────────┐   live → cache → seed
- │ Price layer │◀── Agmarknet (data.gov.in), never blocks on a slow gov API
- └─────┬───────┘
-       ▼
- ┌───────────────────┐   haversine × road-factor (instant), OSRM for map routes
- │ Net-realization    │   net = gross − commission − mandi fee − cess − hamali − transport
- │ engine (pure TS)   │   unit-tested; the LLM never touches a rupee
- └─────┬─────────────┘
-       ▼
- rank by take-home → SELL verdict + ₹ delta vs the naive pick
-```
+**Core (PS-02 MVP — all of it)**
+- ✅ Farmer / crop / quantity / location profile (typed, geolocated, or spoken)
+- ✅ Live market-price data (multi-source, see below) with a **Live / Cached / Reference** freshness badge
+- ✅ Nearby mandi comparison — 18 real APMC yards across the central-UP belt
+- ✅ Transport cost — distance × per-km hire, sized to the load, round-trip aware
+- ✅ Net-realization comparison — every deduction shown to the rupee
+- ✅ Clear recommendation — one SELL verdict + ₹ gained vs the naive highest-price pick
 
-The conversational layer (chat + Hindi voice + WhatsApp) only does **language** —
-it extracts intent, then the deterministic engine does all the money math. That's
-the "honest" promise: every number is reproducible and shown in full.
+**Any crop, no fixed list** — fuzzy search resolves Hindi/English/typos/aliases (गेहूं, aloo, sarson, gajar…) to the right commodity; unknown crops pass through gracefully.
 
-### Stack
+**Bonus**
+- ✅ Historical price trend chart per mandi + WPI-based momentum
+- ✅ **Multiple data sources** with provenance (see `/api/health`)
+- ✅ Map visualization — Leaflet, mandis colored by take-home, **real road route (OSRM)** drawn in-platform to the best mandi
+- ✅ FPO / bulk-selling mode — pool into full truckloads; per-quintal transport drops (auto-recomputes)
+- ✅ Hindi / English UI + Hindi-speaking voice & chat agent
+- ✅ **Proactive advisory** — detects a sell-worthy move per farmer and alerts them
+- ✅ **Operator/admin console** (`/admin`) — farmers, income surfaced, run alerts, place calls
 
-- **Next.js 14 (App Router) + TypeScript + Tailwind** — one app, PWA, one-click deploy
-- **Engine**: pure TS, unit-tested with `node --test`
-- **Prices**: keyless live Agmarknet mirror (primary) → data.gov.in Agmarknet (optional key) → bundled reference seed, cache-first
-- **Geo**: Nominatim geocoding (region-biased) + OSRM road routes, Haversine fallback
-- **Map/chart**: Leaflet + Recharts · **Agent**: any OpenAI-compatible LLM for intent (Groq `gpt-oss-20b` by default; rule-based parser when no key) + deterministic reply · **Voice**: Web Speech API
+## Data sources (multiple, independent)
 
-### API
+| Source | Role | Key? |
+|---|---|---|
+| Agmarknet keyless mirror | **Primary — live daily** mandi modal/min/max (covers ~13/18 of our mandis live) | none |
+| data.gov.in Agmarknet | Official secondary, 300+ commodities | free key |
+| CEDA (Ashoka University) | Broad coverage + independent academic provenance + history | free OTP key |
+| WPI — Office of the Economic Adviser (2012–2026) | Offline fallback: official long-term price trend / momentum | none (bundled) |
+| Bundled reference bands | Last-resort ₹ fallback so the app never blanks | none |
 
-| Route | Purpose |
-|---|---|
-| `POST /api/opportunity` | crop+qty+location → ranked mandis (the core) |
-| `POST /api/chat` | natural-language agent (text/voice) |
-| `POST /api/whatsapp` | Twilio WhatsApp/SMS webhook (TwiML) |
-| `GET /api/geocode?q=` | place → coordinates |
-| `GET /api/trends?mandiId=&crop=` | 30-day price history |
-| `GET /api/meta` | crops, mandis, demo farmer, cost assumptions |
-| `GET /api/health` | honest status of every dependency (prices source/freshness, LLM configured) |
+`GET /api/health` reports which sources are live/configured — the honest, machine-readable provenance.
 
-## Voice & channels
+## How a farmer can use it (communication layers)
 
-**LiveKit Agents is the primary voice stack** (real-time WebRTC), with the browser Web Speech loop as a zero-config fallback. When `LIVEKIT_URL/API_KEY/API_SECRET` are set, the "Voice call" button connects the farmer to a LiveKit room where an agent worker runs the full pipeline via **LiveKit Inference — STT + LLM + TTS + turn detection, no extra provider keys.** The agent's LLM only does *language*; it calls our `findBestMandi` tool so every rupee still comes from the deterministic engine.
+1. **Web / PWA** (`/app`) — type or tap crop → quantity → location, get the ranked mandis, map route, and take-home breakdown. Works on any phone browser, Hindi-first.
+2. **Voice (in-app)** — tap the mic; browser Web Speech loop asks and answers in Hindi. Zero setup.
+3. **Voice (real phone call, LiveKit + Twilio SIP)** — a real WebRTC/PSTN call to a Hindi-speaking agent that runs the same engine (`npm run agent` + LIVEKIT_* / SIP env). Outbound too: the system can **call the farmer** (`POST /api/call`).
+4. **WhatsApp / SMS (Twilio)** — the farmer sends "लखनऊ में 50 क्विंटल गेहूं"; a known sender is greeted by name and can just say "aaj ka bhav?" (`POST /api/whatsapp`). Unknown senders are onboarded conversationally.
+5. **Proactive alerts** — once opted in, NetBhav watches prices and pings the farmer (WhatsApp, escalating to a voice call for high-value moves) when it's time to sell. Managed from `/admin`.
 
-Pieces:
-- `POST /api/livekit/token` — mints a room token (`livekit-server-sdk`); returns `{configured:false}` when env is absent so the UI falls back to browser voice.
-- `livekit-agent/agent.ts` — the agent worker. Run it alongside `next`: `npm run agent` (needs the 3 LiveKit creds). Deploy to LiveKit Cloud for production.
-- `src/components/VoiceCallLiveKit.tsx` — the in-browser call UI (`@livekit/components-react`), lazy-loaded so its ~160 kB only loads on a call.
+One profile, many doors — the farmer's crop/location, entered once (web, WhatsApp, or a call), is remembered and reused across every channel.
 
-**PSTN / phone calls** are a small next step from here: LiveKit SIP bridges a real phone number into the same room + agent — the browser and the phone become two front-ends of one voice brain. WhatsApp stays wired at `POST /api/whatsapp`.
+## Persistence
 
-> Note: the LiveKit worker + frontend typecheck against the installed SDK, but a live LiveKit Cloud project is required to run/verify them end-to-end, and the Inference model IDs (esp. Hindi STT/TTS) should be validated and tuned via the `LIVEKIT_*` env vars once connected.
+Farmer profiles persist to **Supabase** when `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` are set (one table: `create table netbhav_kv (key text primary key, value jsonb);`), else to a local JSON file for dev/tests.
 
+## Stack
 
+Next.js 14 (App Router) · TypeScript · Tailwind · pure-TS engine (node:test) · Leaflet + OSRM · Recharts · LiveKit Agents (voice) · Twilio (WhatsApp/SIP) · Supabase (persistence) · optional OpenAI-compatible LLM (Groq) for intent.
 
-- **Prices** come live from a **keyless Agmarknet mirror** (`mandi-api.onrender.com`) — no signup, ~17–20 of our 24 mandis return yesterday's real modal prices, and bundled reference seed fills any gaps. Optional data.gov.in key (India portal) is a secondary source. The UI badges each result **Live / Cached / Reference**. (Render's free tier can cold-start on the first hit; the client times out gracefully to seed and retries shortly.)
-- **Cost model** (tunable, shown in-app): MP mandi fee 1.5% + ~0.2% nirashrit cess,
-  hamali ₹15/qtl, transport ₹40/km round-trip, 100-qtl truck. **Commission is
-  class-aware** — grain/pulse/oilseed/spice 2%, vegetable 6%, fruit 8% (perishables
-  cost more). **Spoilage in transit** is deducted for perishables, scaled by road
-  distance and capped (onion 4%→12%, garlic a low 1%→4% since cured garlic stores
-  for months; grains 0) — calibration knobs as-of 2025-26. The market fee is legally
-  the buyer's but in practice lands on the farmer's realized price, so we deduct it — and say so.
-- **Distance** defaults to straight-line × 1.35 (fast, offline); OSRM refines the map route.
-- **Trends** are synthesized around the current modal price (no historical store in this
-  build). `// ponytail:` swap for a `pg_cron` daily snapshot when persistence matters.
+## API
 
-Sources: data.gov.in Agmarknet, MP Mandi Board rules, OpenStreetMap/Nominatim, OSRM.
+`POST /api/opportunity` · `POST /api/chat` · `POST /api/whatsapp` · `POST /api/call` · `POST /api/alerts/run` · `GET /api/geocode` · `GET /api/route` · `GET /api/trends` · `GET /api/meta` · `GET /api/admin` · `GET /api/health`
 
+## License
+
+MIT — see [LICENSE](LICENSE).
