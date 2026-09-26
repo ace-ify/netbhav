@@ -11,14 +11,14 @@ import SeasonView from "./SeasonView";
 
 const MandiMap = dynamic(() => import("./MandiMap"), {
   ssr: false,
-  loading: () => <div className="h-[340px] animate-pulse rounded-xl bg-brand-100" />,
+  loading: () => <div className="h-[340px] animate-pulse rounded-lg bg-neutral-100" />,
 });
 
 function FreshnessBadge({ lang, meta }: { lang: Lang; meta: OpportunityResult["priceMeta"] }) {
   const map = {
-    live: { icon: Radio, label: t(lang, "freshLive"), cls: "bg-green-100 text-green-700" },
-    cached: { icon: Database, label: t(lang, "freshCached"), cls: "bg-blue-100 text-blue-700" },
-    seed: { icon: Archive, label: t(lang, "freshSeed"), cls: "bg-amber-100 text-amber-700" },
+    live: { icon: Radio, label: t(lang, "freshLive"), cls: "bg-gain/10 text-gain" },
+    cached: { icon: Database, label: t(lang, "freshCached"), cls: "bg-cached/10 text-cached" },
+    seed: { icon: Archive, label: t(lang, "freshSeed"), cls: "bg-reference/10 text-reference" },
   }[meta.freshness];
   const Icon = map.icon;
   return (
@@ -46,17 +46,17 @@ export default function ResultsPanel({
     <div className="space-y-4">
       <InsightBanner lang={lang} result={result} />
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-brand-500">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-500">
         <div className="flex flex-wrap items-center gap-2">
           <FreshnessBadge lang={lang} meta={result.priceMeta} />
           {result.confidence && (
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                 result.confidence.level === "high"
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-gain/10 text-gain"
                   : result.confidence.level === "medium"
-                    ? "bg-amber-100 text-amber-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-reference/10 text-reference"
+                    : "bg-loss/10 text-loss"
               }`}
               title={result.confidence.reasons.join(" · ")}
             >
@@ -75,7 +75,7 @@ export default function ResultsPanel({
         </div>
         <button
           onClick={() => setShowAssume((v) => !v)}
-          className="flex items-center gap-1 hover:text-brand-700"
+          className="flex items-center gap-1 hover:text-neutral-700"
         >
           <Info className="h-3.5 w-3.5" /> {t(lang, "assumptions")}
         </button>
@@ -84,11 +84,11 @@ export default function ResultsPanel({
       {(result.breakEven || result.pooling) && (
         <div className="grid gap-2 sm:grid-cols-2">
           {result.breakEven && result.breakEven.marginPerQuintal > 0 && (
-            <div className="rounded-xl border border-brand-200 bg-white p-3 text-sm">
-              <div className="text-xs font-semibold uppercase tracking-wide text-brand-500">
+            <div className="rounded-lg border border-neutral-200 bg-white p-3 text-sm">
+              <div className="text-xs font-500 uppercase tracking-wide text-neutral-500">
                 {t(lang, "breakEvenTitle")}
               </div>
-              <p className="mt-1 text-brand-800">
+              <p className="mt-1 text-neutral-800">
                 {lang === "hi"
                   ? `भाव ₹${result.breakEven.floorPerQuintal}/क्विंटल तक गिरने पर भी यही सबसे अच्छा — ₹${result.breakEven.marginPerQuintal}/क्विंटल की गुंजाइश।`
                   : `Still the best even if its price fell to ₹${result.breakEven.floorPerQuintal}/qtl — a ₹${result.breakEven.marginPerQuintal}/qtl cushion.`}
@@ -96,11 +96,11 @@ export default function ResultsPanel({
             </div>
           )}
           {result.pooling && result.pooling.gainPerQuintal > 0 && (
-            <div className="rounded-xl border border-gold-500 bg-gold-400/10 p-3 text-sm">
-              <div className="text-xs font-semibold uppercase tracking-wide text-gold-600">
+            <div className="rounded-lg border border-yellow-500/50 bg-yellow-50 p-3 text-sm">
+              <div className="text-xs font-500 uppercase tracking-wide text-yellow-700">
                 {t(lang, "poolTitle")}
               </div>
-              <p className="mt-1 text-brand-800">
+              <p className="mt-1 text-neutral-800">
                 {lang === "hi"
                   ? `पूरे ट्रक में मिलाकर बेचें → +₹${result.pooling.gainPerQuintal}/क्विंटल${result.pooling.unlocksFarther ? " (दूर की बेहतर मंडी खुलती है)" : ""}।`
                   : `Pool into a full truckload → +₹${result.pooling.gainPerQuintal}/qtl${result.pooling.unlocksFarther ? " (unlocks a farther, better mandi)" : ""}.`}
@@ -111,7 +111,7 @@ export default function ResultsPanel({
       )}
 
       {showAssume && (
-        <div className="rounded-xl border border-brand-200 bg-white p-3 text-xs text-brand-600">
+        <div className="rounded-lg border border-neutral-200 bg-white p-3 text-xs text-neutral-600">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3">
             <span>{t(lang, "mandiFee")}: {a.mandiFeePercent}%</span>
             <span>{t(lang, "commission")}: 2–8% ({lang === "hi" ? "फसल अनुसार" : "by crop"})</span>
@@ -119,12 +119,12 @@ export default function ResultsPanel({
             <span>{t(lang, "hamali")}: {inr(a.hamaliPerQuintal)}/q</span>
             <span className="col-span-2 sm:col-span-3">{t(lang, "freight")}</span>
           </div>
-          <p className="mt-2 text-brand-400">{t(lang, "poweredNote")}</p>
+          <p className="mt-2 text-neutral-400">{t(lang, "poweredNote")}</p>
         </div>
       )}
 
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-brand-700">{t(lang, "map")}</h3>
+        <h3 className="mb-2 text-xs font-500 uppercase tracking-wide text-neutral-500">{t(lang, "map")}</h3>
         <MandiMap
           lang={lang}
           result={result}
@@ -137,7 +137,7 @@ export default function ResultsPanel({
       <SeasonView lang={lang} cropId={cropId} />
 
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-brand-700">{t(lang, "allMandis")}</h3>
+        <h3 className="mb-2 text-xs font-500 uppercase tracking-wide text-neutral-500">{t(lang, "allMandis")}</h3>
         <div className="space-y-2">
           {result.opportunities.map((o) => (
             <MandiCard

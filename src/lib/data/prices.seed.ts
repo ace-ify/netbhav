@@ -1,80 +1,100 @@
 import type { PriceRecord, TrendPoint } from "@/lib/types";
 
-// Seed prices (₹/quintal) reflecting 2024-25 MP mandi bands. Used as the
+// Seed prices (₹/quintal) reflecting 2024-25 central-UP mandi bands. Used as the
 // cache-first primary for the demo and as the fallback when Agmarknet is
-// unreachable (it often is). [mandiId, modal, min, max].
+// unreachable. [mandiId, modal, min, max]. Mandi ids match data/mandis.ts.
 type Row = [string, number, number, number];
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
+// WHEAT — the headline demo. A far mandi (Gonda ~125km, Shahjahanpur ~140km)
+// posts the highest sticker, but transport eats it: near Lucknow/Unnao win take-home.
 const WHEAT: Row[] = [
-  ["indore-choithram", 2620, 2400, 2950], ["indore-chhawni", 2650, 2420, 3050],
-  ["mhow", 2550, 2380, 2820], ["sanwer", 2580, 2400, 2860],
-  ["depalpur", 2540, 2360, 2800], ["dewas", 2600, 2400, 2900],
-  ["sonkatch", 2720, 2450, 3250], ["bagli", 2560, 2380, 2820],
-  ["kannod", 2570, 2380, 2830], ["khategaon", 2590, 2400, 2880],
-  ["ujjain-chimanganj", 2610, 2400, 2950], ["badnagar", 2560, 2380, 2840],
-  ["tarana", 2570, 2390, 2850], ["nagda", 2540, 2360, 2800],
-  ["dhar", 2530, 2350, 2790], ["badnawar", 2560, 2380, 2860],
-  ["ratlam", 2580, 2380, 2900], ["jaora", 2560, 2380, 2860],
-  ["shajapur", 2590, 2400, 2900], ["shujalpur", 2600, 2400, 2950],
-  ["sehore", 2780, 2480, 3400], ["ashta", 2740, 2450, 3300],
-  ["agar-malwa", 2560, 2380, 2850], ["bhopal-karond", 2650, 2420, 3100],
+  ["lucknow", 2510, 2350, 2720], ["barabanki", 2530, 2360, 2740],
+  ["unnao", 2540, 2370, 2760], ["sitapur", 2560, 2380, 2780],
+  ["hardoi", 2570, 2390, 2800], ["raebareli", 2545, 2370, 2760],
+  ["lakhimpur", 2555, 2380, 2780], ["kanpur", 2600, 2400, 2860],
+  ["fatehpur", 2560, 2380, 2790], ["sultanpur", 2540, 2360, 2760],
+  ["amethi", 2535, 2360, 2750], ["ayodhya", 2580, 2390, 2820],
+  ["gonda", 2720, 2450, 3050], ["bahraich", 2690, 2440, 3000],
+  ["pratapgarh", 2550, 2370, 2770], ["kannauj", 2565, 2385, 2790],
+  ["farrukhabad", 2575, 2390, 2810], ["shahjahanpur", 2700, 2450, 3020],
 ];
 
-const SOYBEAN: Row[] = [
-  ["indore-choithram", 4550, 4000, 4850], ["mhow", 4450, 3950, 4750],
-  ["sanwer", 4480, 3980, 4780], ["depalpur", 4420, 3920, 4720],
-  ["dewas", 4520, 4000, 4820], ["sonkatch", 4500, 3980, 4800],
-  ["bagli", 4460, 3950, 4760], ["kannod", 4440, 3930, 4740],
-  ["khategaon", 4470, 3950, 4770], ["ujjain-chimanganj", 4530, 4000, 4830],
-  ["badnagar", 4460, 3950, 4760], ["tarana", 4470, 3950, 4770],
-  ["nagda", 4430, 3920, 4730], ["dhar", 4410, 3900, 4710],
-  ["badnawar", 4450, 3950, 4750], ["ratlam", 4500, 3980, 4820],
-  ["jaora", 4480, 3960, 4780], ["shajapur", 4510, 3980, 4810],
-  ["shujalpur", 4520, 3990, 4820], ["sehore", 4540, 4000, 4850],
-  ["ashta", 4530, 4000, 4840], ["agar-malwa", 4490, 3960, 4790],
-  ["bhopal-karond", 4520, 3990, 4820],
+// PADDY (Dhan) — UP flagship kharif crop.
+const PADDY: Row[] = [
+  ["lucknow", 2280, 2100, 2450], ["barabanki", 2300, 2120, 2480],
+  ["unnao", 2260, 2080, 2430], ["sitapur", 2320, 2150, 2500],
+  ["hardoi", 2330, 2160, 2520], ["raebareli", 2290, 2110, 2460],
+  ["lakhimpur", 2350, 2180, 2540], ["kanpur", 2310, 2130, 2490],
+  ["fatehpur", 2280, 2100, 2450], ["sultanpur", 2295, 2110, 2470],
+  ["ayodhya", 2340, 2160, 2520], ["gonda", 2360, 2180, 2560],
+  ["bahraich", 2370, 2190, 2580], ["shahjahanpur", 2355, 2180, 2550],
+  ["kannauj", 2300, 2120, 2480], ["farrukhabad", 2310, 2130, 2490],
 ];
 
-const GRAM: Row[] = [
-  ["indore-choithram", 6600, 5600, 7200], ["indore-chhawni", 6650, 5650, 7300],
-  ["mhow", 6350, 5500, 6900], ["sanwer", 6400, 5500, 6950],
-  ["depalpur", 6300, 5450, 6850], ["dewas", 6500, 5550, 7050],
-  ["sonkatch", 6450, 5500, 7000], ["bagli", 6300, 5450, 6850],
-  ["kannod", 6280, 5450, 6830], ["khategaon", 6350, 5500, 6900],
-  ["ujjain-chimanganj", 6550, 5550, 7100], ["badnagar", 6350, 5500, 6900],
-  ["tarana", 6380, 5500, 6930], ["nagda", 6320, 5480, 6870],
-  ["dhar", 6280, 5450, 6820], ["badnawar", 6360, 5500, 6910],
-  ["ratlam", 6480, 5550, 7000], ["jaora", 6420, 5520, 6950],
-  ["shajapur", 6500, 5550, 7050], ["shujalpur", 6520, 5550, 7080],
-  ["sehore", 6550, 5580, 7100], ["ashta", 6530, 5560, 7080],
-  ["agar-malwa", 6400, 5500, 6950], ["bhopal-karond", 6600, 5600, 7200],
+// POTATO — UP is India's #1 producer; low per-quintal, storable tuber.
+const POTATO: Row[] = [
+  ["lucknow", 1150, 700, 1600], ["barabanki", 1120, 680, 1560],
+  ["unnao", 1100, 660, 1540], ["hardoi", 1180, 720, 1650],
+  ["kanpur", 1200, 740, 1680], ["farrukhabad", 1250, 780, 1720],
+  ["kannauj", 1230, 760, 1700], ["fatehpur", 1140, 700, 1580],
+  ["sitapur", 1160, 710, 1600], ["shahjahanpur", 1210, 750, 1690],
 ];
 
-const ONION: Row[] = [
-  ["indore-choithram", 1700, 600, 3200], ["mhow", 1500, 500, 2800],
-  ["sanwer", 1550, 500, 2900], ["dewas", 1600, 550, 3000],
-  ["khategaon", 1450, 500, 2700], ["ujjain-chimanganj", 1650, 600, 3100],
-  ["ratlam", 1600, 550, 3000], ["shajapur", 1500, 500, 2850],
-  ["ashta", 1480, 500, 2800], ["agar-malwa", 1520, 500, 2850],
-  ["bhopal-karond", 1750, 650, 3300],
-];
-
-const GARLIC: Row[] = [
-  ["indore-choithram", 10500, 5000, 18000], ["ujjain-chimanganj", 11000, 5200, 19000],
-  ["badnagar", 11500, 5500, 20000], ["tarana", 10000, 4800, 17000],
-  ["nagda", 11800, 5500, 20500], ["ratlam", 12500, 6000, 21000],
-  ["jaora", 12000, 5800, 20500], ["agar-malwa", 10800, 5000, 18500],
-];
-
+// MUSTARD (Sarson) — rabi oilseed.
 const MUSTARD: Row[] = [
-  ["dewas", 5750, 5200, 6200], ["sonkatch", 5780, 5250, 6250],
-  ["ujjain-chimanganj", 5800, 5250, 6300], ["tarana", 5760, 5200, 6250],
-  ["shajapur", 5820, 5300, 6300], ["shujalpur", 5830, 5300, 6320],
-  ["sehore", 5850, 5300, 6350], ["ashta", 5840, 5300, 6330],
-  ["agar-malwa", 5790, 5250, 6280], ["bhopal-karond", 5870, 5350, 6380],
-  ["badnawar", 5740, 5200, 6220],
+  ["lucknow", 5450, 5000, 5900], ["barabanki", 5480, 5050, 5950],
+  ["hardoi", 5500, 5080, 5980], ["sitapur", 5470, 5030, 5930],
+  ["unnao", 5440, 5000, 5880], ["kanpur", 5520, 5100, 6000],
+  ["fatehpur", 5460, 5020, 5900], ["shahjahanpur", 5540, 5120, 6050],
+  ["farrukhabad", 5510, 5090, 5990], ["gonda", 5490, 5060, 5960],
+];
+
+// ARHAR (Tur) — pulse.
+const ARHAR: Row[] = [
+  ["lucknow", 7400, 6800, 8000], ["kanpur", 7500, 6900, 8100],
+  ["barabanki", 7420, 6820, 8020], ["raebareli", 7380, 6780, 7980],
+  ["fatehpur", 7450, 6850, 8050], ["sultanpur", 7360, 6760, 7960],
+  ["hardoi", 7470, 6870, 8070], ["unnao", 7410, 6810, 8010],
+];
+
+// GRAM (Chana) — pulse.
+const GRAM: Row[] = [
+  ["lucknow", 5600, 5100, 6100], ["kanpur", 5700, 5200, 6200],
+  ["hardoi", 5650, 5150, 6150], ["sitapur", 5620, 5120, 6120],
+  ["unnao", 5580, 5080, 6080], ["fatehpur", 5660, 5160, 6160],
+  ["shahjahanpur", 5720, 5220, 6220], ["farrukhabad", 5680, 5180, 6180],
+];
+
+// MAIZE (Makka).
+const MAIZE: Row[] = [
+  ["lucknow", 2050, 1800, 2300], ["bahraich", 2120, 1850, 2380],
+  ["lakhimpur", 2100, 1840, 2360], ["gonda", 2110, 1850, 2370],
+  ["sitapur", 2080, 1820, 2340], ["hardoi", 2070, 1810, 2330],
+  ["kanpur", 2090, 1830, 2350], ["shahjahanpur", 2130, 1860, 2390],
+];
+
+// ONION — perishable (spoilage demo). Volatile band.
+const ONION: Row[] = [
+  ["lucknow", 1800, 700, 3200], ["kanpur", 1750, 650, 3100],
+  ["barabanki", 1700, 620, 3000], ["hardoi", 1650, 600, 2900],
+  ["sitapur", 1680, 610, 2950], ["ayodhya", 1720, 630, 3050],
+  ["gonda", 1620, 590, 2880], ["shahjahanpur", 1760, 660, 3120],
+];
+
+// GARLIC — high-value, low spoilage (cured stores for months).
+const GARLIC: Row[] = [
+  ["lucknow", 11000, 5000, 18000], ["kanpur", 11500, 5200, 19000],
+  ["hardoi", 10800, 4900, 17500], ["farrukhabad", 12000, 5500, 20000],
+  ["kannauj", 11800, 5400, 19500], ["shahjahanpur", 11200, 5100, 18500],
+];
+
+// TOMATO — most perishable of the set.
+const TOMATO: Row[] = [
+  ["lucknow", 1900, 800, 3500], ["barabanki", 1850, 780, 3400],
+  ["kanpur", 1950, 820, 3600], ["unnao", 1820, 760, 3350],
+  ["sitapur", 1880, 790, 3450], ["hardoi", 1830, 770, 3380],
 ];
 
 function toRecords(crop: string, rows: Row[]): PriceRecord[] {
@@ -91,11 +111,15 @@ function toRecords(crop: string, rows: Row[]): PriceRecord[] {
 
 export const SEED_PRICES: PriceRecord[] = [
   ...toRecords("wheat", WHEAT),
-  ...toRecords("soybean", SOYBEAN),
+  ...toRecords("paddy", PADDY),
+  ...toRecords("potato", POTATO),
+  ...toRecords("mustard", MUSTARD),
+  ...toRecords("arhar", ARHAR),
   ...toRecords("gram", GRAM),
+  ...toRecords("maize", MAIZE),
   ...toRecords("onion", ONION),
   ...toRecords("garlic", GARLIC),
-  ...toRecords("mustard", MUSTARD),
+  ...toRecords("tomato", TOMATO),
 ];
 
 export function seedPricesFor(crop: string): PriceRecord[] {
@@ -136,4 +160,3 @@ function hash(s: string): number {
   }
   return h & 0x7fffffff;
 }
-

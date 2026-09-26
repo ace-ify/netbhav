@@ -88,7 +88,10 @@ export async function solveOpportunity(
 ): Promise<OpportunityResult> {
   const params: CostParams = { ...DEFAULT_COST_PARAMS, ...overrides };
   const crop = getCrop(query.crop);
-  const bundle = await getPrices(query.crop);
+  // Normalize any fuzzy crop input (e.g. "aloo", "gehun") to its canonical id so
+  // seed lookup, live feed and engine class-math all key off the same crop.
+  query = { ...query, crop: crop.id };
+  const bundle = await getPrices(crop.id);
   const priceByMandi = new Map(bundle.records.map((r) => [r.mandiId, r]));
 
   const opps = buildOpps(query, priceByMandi, params, Boolean(query.fpo));

@@ -14,7 +14,6 @@ import Nav from "@/components/ui/Nav";
 import PillButton from "@/components/ui/PillButton";
 import Card from "@/components/ui/Card";
 import Stat from "@/components/ui/Stat";
-import Badge from "@/components/ui/Badge";
 import AnalysisSection from "@/components/ui/AnalysisSection";
 import WhatsAppSignup from "@/components/ui/WhatsAppSignup";
 

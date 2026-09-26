@@ -14,7 +14,7 @@ const API_KEY =
   process.env.DATA_GOV_API_KEY || "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b";
 // Keyless, live Agmarknet mirror (primary source — no key, works out of the box).
 const MANDI_API = process.env.MANDI_API_URL || "https://mandi-api.onrender.com";
-const STATE = process.env.MANDI_STATE || "Madhya Pradesh";
+const STATE = process.env.MANDI_STATE || "Uttar Pradesh";
 const TIMEOUT_MS = 3500;
 const MANDI_API_TIMEOUT_MS = 9000; // Render free tier can cold-start; give it room
 const TTL_MS = 3 * 60 * 60 * 1000; // 3-hour freshness, matching a pg_cron sync cadence

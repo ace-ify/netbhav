@@ -123,7 +123,7 @@ function composeEn(r: OpportunityResult, usedFallback: boolean): string {
     parts.push(`Prices are gently rising — worth watching the trend for a day or two.`);
   else parts.push(`Prices are flat or slipping, so selling now is the safe call.`);
   if (usedFallback) {
-    parts.push(`I assumed your location is the demo village near Rau — share your location for a more accurate answer.`);
+    parts.push(`I assumed your location is the demo village near Lucknow — share your location for a more accurate answer.`);
   }
   return parts.join(" ");
 }
@@ -157,18 +157,18 @@ function composeHi(r: OpportunityResult, usedFallback: boolean): string {
     parts.push(`भाव हल्के चढ़ रहे हैं — एक-दो दिन रुझान देखना ठीक रहेगा।`);
   else parts.push(`भाव स्थिर या गिर रहे हैं, इसलिए अभी बेचना सुरक्षित है।`);
   if (usedFallback) {
-    parts.push(`मैंने आपका स्थान राऊ के पास वाला डेमो गाँव मान लिया है — सटीक उत्तर के लिए अपना स्थान साझा करें।`);
+    parts.push(`मैंने आपका स्थान लखनऊ के पास वाला डेमो गाँव मान लिया है — सटीक उत्तर के लिए अपना स्थान साझा करें।`);
   }
   return parts.join(" ");
 }
 
 function clarify(lang: Lang, needCrop: boolean, needQty: boolean): string {
   if (lang === "hi") {
-    if (needCrop && needQty) return "आप कौन सी फसल और कितने क्विंटल बेचना चाहते हैं? (जैसे: राऊ में 50 क्विंटल गेहूं)";
+    if (needCrop && needQty) return "आप कौन सी फसल और कितने क्विंटल बेचना चाहते हैं? (जैसे: लखनऊ में 50 क्विंटल गेहूं)";
     if (needCrop) return "आप कौन सी फसल बेच रहे हैं — गेहूं, सोयाबीन, चना, प्याज, लहसुन या सरसों?";
     return "आपके पास कितने क्विंटल हैं?";
   }
-  if (needCrop && needQty) return "Which crop and how many quintals are you selling? (e.g. 50 quintal wheat at Rau)";
+  if (needCrop && needQty) return "Which crop and how many quintals are you selling? (e.g. 50 quintal wheat at Lucknow)";
   if (needCrop) return "Which crop are you selling — wheat, soybean, gram, onion, garlic or mustard?";
   return "How many quintals do you have?";
 }

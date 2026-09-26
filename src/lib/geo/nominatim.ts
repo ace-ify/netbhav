@@ -9,10 +9,10 @@ export interface GeoResult {
 
 const UA = "NetBhav/0.1 (mandi opportunity agent; contact: demo@netbhav.app)";
 
-// Soft bias toward the covered mandi region (MP Malwa belt). Without it,
-// ambiguous Devanagari names resolve wrong — e.g. "राऊ" → Pune, not Rau/Indore.
-// bounded=0 keeps it a *preference*, so out-of-region places still resolve.
-const VIEWBOX = process.env.GEO_VIEWBOX || "74.0,25.5,80.5,21.0"; // lng,lat,lng,lat
+// Soft bias toward the covered mandi region (central-UP / Awadh belt). Without
+// it, ambiguous Devanagari names resolve wrong. bounded=0 keeps it a
+// *preference*, so out-of-region places still resolve.
+const VIEWBOX = process.env.GEO_VIEWBOX || "78.5,28.5,82.8,25.3"; // lng,lat,lng,lat
 
 async function get<T>(url: string, headers?: Record<string, string>, ms = 5000): Promise<T | null> {
   const ctrl = new AbortController();

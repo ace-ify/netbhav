@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       );
     }
     return twiml(
-      "Namaste! Send your crop, quantity and place — e.g. '50 quintal wheat at Rau' / 'राऊ में 50 क्विंटल गेहूं'."
+      "Namaste! Send your crop, quantity and place — e.g. '50 quintal wheat at Lucknow' / 'लखनऊ में 50 क्विंटल गेहूं'."
     );
   }
 

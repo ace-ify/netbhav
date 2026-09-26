@@ -4,24 +4,25 @@
 
 > PS-02: Mandi Opportunity Agent. A farmer chases the highest sticker price; the road, the commission and the fees quietly eat the difference. NetBhav does the honest math — **net realization = price − transport − commission − mandi fees** — and ranks every nearby mandi by what you'd actually take home, in Hindi, on any phone.
 
-## The ₹8,000 that hides in plain sight
+## The ₹9,500 that hides in plain sight
 
-Real numbers from this app (50 quintal wheat, farmer near Rau, Indore):
+Real numbers from this app (50 quintal mustard, farmer near Lucknow):
 
 | Mandi | Sticker price | Distance | **Take-home** |
 |---|---|---|---|
-| Sehore | ₹2,780/qtl ⬅ *highest price* | ~110 km | ₹1,17,242 |
-| **Indore (Chhawni)** | ₹2,650/qtl | ~16 km | **₹1,25,565** ⬅ *best take-home* |
+| Shahjahanpur | ₹5,540/qtl ⬅ *highest price* | ~198 km | ₹2,52,129 |
+| **Lucknow (Sitapur Rd)** | ₹5,450/qtl | ~24 km | **₹2,61,686** ⬅ *best take-home* |
 
-Chasing the highest price would cost this farmer **₹8,402**. Same crop. Smarter mandi.
+Chasing the highest price would cost this farmer **₹9,556**. Same crop. Smarter mandi.
 
-And it's not a rule of thumb — for **garlic** (a high-value crop), the app correctly says travel the 148 km to Ratlam, because there the price gap dwarfs the transport. It does the real math every time, not a slogan.
+And it's not a rule of thumb — type any crop (Hindi or English, typos welcome) and the app does the real math every time. For a high-value, storable crop it will happily send you the long haul when the price gap dwarfs the transport; for a perishable it won't. Not a slogan — the math, every time.
 
 ## What it does (PS-02 MVP — all of it)
 
 - ✅ **Farmer/crop profile** — crop, quantity, location (typed, geolocated, or spoken)
 - ✅ **Market-price data source** — Agmarknet (data.gov.in) live, cache-first, with bundled reference fallback
-- ✅ **Nearby mandi comparison** — 24 real APMC yards across the MP Malwa belt
+- ✅ **Nearby mandi comparison** — 18 real APMC yards across the central-UP (Awadh) belt
+- ✅ **Any crop, no fixed list** — fuzzy search resolves Hindi/English/typos (गेहूं, aloo, sarson…) to the right commodity
 - ✅ **Transport-cost calculation** — distance × per-km hire, trips for load size, round-trip aware
 - ✅ **Net realization comparison** — every deduction shown, to the rupee
 - ✅ **Clear recommendation** — one SELL verdict + the ₹ you gain over the naive choice
@@ -53,7 +54,7 @@ npm run build      # production build
 ## Try these
 
 - Type: **crop → quantity → location**, tap *Find best mandi*.
-- Tap the mic in the chat bubble and say *"राऊ में 50 क्विंटल गेहूं"* or *"50 quintal wheat at Rau"*.
+- Tap the mic in the chat bubble and say *"लखनऊ में 50 क्विंटल गेहूं"* or *"50 quintal wheat at Lucknow"*.
 - Toggle **हिंदी / EN** top-right. Toggle **FPO / bulk mode**. Expand any mandi for the full math + trend.
 - WhatsApp: point a Twilio sandbox webhook at `POST /api/whatsapp`.
 

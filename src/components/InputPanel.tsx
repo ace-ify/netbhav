@@ -114,7 +114,7 @@ export default function InputPanel({
           <button
             key={c.id}
             onClick={() => setCrop(c.id)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition ${
+            className={`flex min-h-12 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition ${
               crop === c.id
                 ? "border-neutral-900 bg-neutral-900 text-white"
                 : "border-neutral-200 bg-neutral-50 text-neutral-800 hover:border-neutral-400"

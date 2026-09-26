@@ -18,9 +18,9 @@ export default function InsightBanner({
 
   const adv = result.advisory ?? advise(trendFor(best.mandi.id, result.crop.id, 30));
   const AD: Record<string, { label: StrKey; why: StrKey; cls: string }> = {
-    SELL: { label: "adSell", why: "adSellWhy", cls: "bg-green-400/20 text-green-100 ring-green-300/40" },
-    WAIT: { label: "adWait", why: "adWaitWhy", cls: "bg-blue-400/20 text-blue-100 ring-blue-300/40" },
-    MONITOR: { label: "adMonitor", why: "adMonitorWhy", cls: "bg-gold-400/20 text-gold-100 ring-gold-300/40" },
+    SELL: { label: "adSell", why: "adSellWhy", cls: "bg-emerald-500/15 text-emerald-300 ring-emerald-400/40" },
+    WAIT: { label: "adWait", why: "adWaitWhy", cls: "bg-white/10 text-neutral-200 ring-white/20" },
+    MONITOR: { label: "adMonitor", why: "adMonitorWhy", cls: "bg-yellow-500/15 text-yellow-300 ring-yellow-400/40" },
   };
   const ad = AD[adv.signal];
 
@@ -31,10 +31,10 @@ export default function InsightBanner({
   const showTrap = headlineDelta > 0;
 
   return (
-    <div className="animate-pop overflow-hidden rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-600 to-brand-700 text-white shadow-lg">
+    <div className="animate-pop overflow-hidden rounded-lg border border-neutral-200 bg-neutral-900 text-white shadow-lg">
       <div className="p-5 sm:p-7">
-        <div className="flex items-center gap-2 text-brand-100">
-          <TrendingUp className="h-5 w-5 text-gold-400" />
+        <div className="flex items-center gap-2 text-neutral-300">
+          <TrendingUp className="h-5 w-5 text-neutral-400" />
           <span className="text-sm font-medium">
             {lang === "hi" ? "समझदार फ़ैसला" : "The smart call"}
           </span>
@@ -42,7 +42,7 @@ export default function InsightBanner({
 
         {showTrap ? (
           <>
-            <p className="mt-3 text-lg font-medium text-brand-50">
+            <p className="mt-3 text-lg font-500 text-neutral-200">
               {naiveIsBest
                 ? lang === "hi"
                   ? "सबसे नज़दीकी मंडी के बजाय यहाँ बेचकर"
@@ -52,29 +52,29 @@ export default function InsightBanner({
                   : "Skip the highest-price mandi, sell here and keep"}
             </p>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold text-gold-400 tabular sm:text-5xl">
+              <span className="font-oswald text-4xl font-600 tracking-tight text-yellow-500 tabular sm:text-5xl">
                 +{inr(headlineDelta)}
               </span>
-              <span className="text-brand-100">
+              <span className="text-neutral-300">
                 {naiveIsBest ? t(lang, "vsNearest") : t(lang, "extraInPocket")}
               </span>
             </div>
-            <p className="mt-1 text-sm text-brand-100">
+            <p className="mt-1 text-sm text-neutral-400">
               {naiveIsBest ? "" : t(lang, "vsHighestPrice")} · {t(lang, "sameCrop")}
             </p>
           </>
         ) : (
-          <p className="mt-3 text-2xl font-bold">{t(lang, "sameCrop")}</p>
+          <p className="mt-3 font-oswald text-2xl font-600 tracking-tight">{t(lang, "sameCrop")}</p>
         )}
 
         <div className="mt-5 rounded-xl bg-white/10 p-4 backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-wide text-brand-100">
+              <div className="text-xs uppercase tracking-wide text-neutral-300">
                 {t(lang, "sell")}
               </div>
               <div className="text-2xl font-bold">{best.mandi.name}</div>
-              <div className="flex items-center gap-3 text-sm text-brand-100">
+              <div className="flex items-center gap-3 text-sm text-neutral-400">
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" /> {best.mandi.district}
                 </span>
@@ -84,13 +84,13 @@ export default function InsightBanner({
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs uppercase tracking-wide text-brand-100">
+              <div className="text-xs uppercase tracking-wide text-neutral-300">
                 {t(lang, "takeHome")}
               </div>
-              <div className="text-3xl font-extrabold text-gold-400 tabular">
+              <div className="font-oswald text-3xl font-600 tracking-tight text-emerald-400 tabular">
                 {inr(best.netRealization)}
               </div>
-              <div className="text-sm text-brand-100 tabular">
+              <div className="text-sm text-neutral-400 tabular">
                 {inr(best.netPerQuintal)}/{t(lang, "quintals").replace(/s$/, "")}
               </div>
             </div>

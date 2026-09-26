@@ -23,8 +23,8 @@ export default function Dashboard() {
         // Unknown phone → start a blank profile to fill in.
         setP({
           phone,
-          lat: 22.6255,
-          lng: 75.7935,
+          lat: 26.8106,
+          lng: 80.7746,
           lang: "hi",
           crops: [{ cropId: "wheat", expectedQuintals: 50 }],
           consentToCall: false,

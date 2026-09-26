@@ -47,24 +47,24 @@ export default function TrendChart({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs font-semibold text-brand-600">
+        <span className="text-xs font-500 text-neutral-600">
           {t(lang, "trend")}
-          <span className={`ml-1 font-normal ${real ? "text-green-600" : "text-amber-600"}`}>
+          <span className={`ml-1 font-normal ${real ? "text-gain" : "text-reference"}`}>
             · {real ? t(lang, "freshLive") : t(lang, "freshSeed")}
           </span>
         </span>
-        <span className={`text-xs font-medium ${up ? "text-brand-600" : "text-red-600"}`}>
+        <span className={`text-xs font-medium ${up ? "text-gain" : "text-loss"}`}>
           {up ? "▲" : "▼"} {inr(Math.abs(last - first))} ({(((last - first) / (first || 1)) * 100).toFixed(1)}%)
         </span>
       </div>
       <ResponsiveContainer width="100%" height={110}>
         <LineChart data={data} margin={{ top: 5, right: 6, left: 6, bottom: 0 }}>
-          <XAxis dataKey="date" tick={{ fontSize: 9 }} interval={Math.ceil(data.length / 5)} stroke="#8ec292" />
+          <XAxis dataKey="date" tick={{ fontSize: 9, fontFamily: "var(--font-oswald)" }} interval={Math.ceil(data.length / 5)} stroke="#a3a3a3" />
           <YAxis
             domain={[Math.floor(min * 0.98), Math.ceil(max * 1.02)]}
-            tick={{ fontSize: 9 }}
+            tick={{ fontSize: 9, fontFamily: "var(--font-oswald)" }}
             width={44}
-            stroke="#8ec292"
+            stroke="#a3a3a3"
             tickFormatter={(v) => `₹${v}`}
           />
           <Tooltip
@@ -72,8 +72,8 @@ export default function TrendChart({
             labelStyle={{ fontSize: 11 }}
             contentStyle={{ fontSize: 11, borderRadius: 8 }}
           />
-          <ReferenceLine y={first} stroke="#cbd5cb" strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="price" stroke={up ? "#2a6830" : "#dc2626"} strokeWidth={2} dot={false} />
+          <ReferenceLine y={first} stroke="#d4d4d4" strokeDasharray="3 3" />
+          <Line type="monotone" dataKey="price" stroke="#171717" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

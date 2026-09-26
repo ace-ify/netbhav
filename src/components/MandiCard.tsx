@@ -22,14 +22,14 @@ export default function MandiCard({
   const best = o.rank === 1;
   return (
     <div
-      className={`overflow-hidden rounded-xl border bg-white transition ${
-        best ? "border-gold-500 ring-1 ring-gold-400" : "border-brand-200"
+      className={`overflow-hidden rounded-lg border bg-white transition ${
+        best ? "border-gain ring-1 ring-gain" : "border-neutral-200"
       }`}
     >
       <button onClick={onToggle} className="flex w-full items-center gap-3 p-3 text-left sm:p-4">
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-            best ? "bg-gold-500 text-white" : "bg-brand-100 text-brand-700"
+            best ? "bg-gain text-white" : "bg-neutral-100 text-neutral-700"
           }`}
         >
           {best ? <Award className="h-5 w-5" /> : o.rank}
@@ -37,23 +37,23 @@ export default function MandiCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate font-semibold text-brand-900">{o.mandi.name}</span>
+            <span className="truncate font-500 text-neutral-900">{o.mandi.name}</span>
             {best && (
-              <span className="rounded-full bg-gold-400/20 px-2 py-0.5 text-[10px] font-bold uppercase text-gold-600">
+              <span className="rounded-full bg-gain/10 px-2 py-0.5 text-[10px] font-bold uppercase text-gain">
                 {t(lang, "bestTakeHome")}
               </span>
             )}
             {o.channel === "doorstep" ? (
-              <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">
+              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase text-neutral-600">
                 {t(lang, "chDoorstep")}
               </span>
             ) : o.enam ? (
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">
+              <span className="rounded-full bg-cached/10 px-2 py-0.5 text-[10px] font-bold uppercase text-cached">
                 {t(lang, "chEnam")}
               </span>
             ) : null}
           </div>
-          <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-brand-500">
+          <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-neutral-500">
             <span>{o.mandi.district}</span>
             <span>· {o.roadKm} {t(lang, "km")}</span>
             <span className="tabular">· {t(lang, "price")} {inr(o.modalPricePerQuintal)}</span>
@@ -61,20 +61,20 @@ export default function MandiCard({
         </div>
 
         <div className="shrink-0 text-right">
-          <div className="tabular text-lg font-bold text-brand-800">{inr(o.netRealization)}</div>
+          <div className="tabular font-oswald text-lg font-600 text-gain">{inr(o.netRealization)}</div>
           {best ? (
-            <div className="text-xs font-medium text-gold-600">{t(lang, "takeHome")}</div>
+            <div className="text-xs font-medium text-gain">{t(lang, "takeHome")}</div>
           ) : (
-            <div className="tabular text-xs font-medium text-red-500">{inr(o.deltaVsBest)}</div>
+            <div className="tabular text-xs font-medium text-loss">{inr(o.deltaVsBest)}</div>
           )}
         </div>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-brand-400 transition ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-neutral-400 transition ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {open && (
-        <div className="space-y-3 border-t border-brand-100 p-3 sm:p-4">
+        <div className="space-y-3 border-t border-neutral-100 p-3 sm:p-4">
           <NetRealizationBreakdown lang={lang} o={o} />
           <TrendChart lang={lang} mandiId={o.mandi.id} crop={crop} />
         </div>
