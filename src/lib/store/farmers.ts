@@ -47,7 +47,7 @@ function storePath(): string {
   return process.env.FARMERS_STORE_PATH || path.join(process.cwd(), "data", "farmers.json");
 }
 
-export const DEMO_PHONE = "+919999900000";
+export const DEMO_PHONE = "+918756260291";
 
 /** Normalize any Indian phone / WhatsApp id to +91XXXXXXXXXX (or "" if unusable). */
 export function normalizePhone(raw: string): string {
@@ -62,23 +62,62 @@ export function normalizePhone(raw: string): string {
   return "+" + d;
 }
 
-function demoProfile(): FarmerProfile {
-  return {
-    phone: DEMO_PHONE,
-    name: "Ramesh (demo)",
-    lat: DEMO_FARMER.lat,
-    lng: DEMO_FARMER.lng,
-    locationLabel: DEMO_FARMER.name,
-    lang: "hi",
-    crops: [{ cropId: "wheat", expectedQuintals: 50 }],
-    consentToCall: false,
-    alertHistory: [],
-  };
+// Seed farmers across the central-UP belt so the dashboard + admin console show
+// real, varied data on first run (persisted to Supabase on the first write).
+function seedFarmers(): FarmerProfile[] {
+  const now = new Date().toISOString();
+  return [
+    {
+      phone: DEMO_PHONE, // Naimish — the primary demo farmer
+      name: "Naimish",
+      lat: DEMO_FARMER.lat,
+      lng: DEMO_FARMER.lng,
+      locationLabel: DEMO_FARMER.name,
+      lang: "en",
+      crops: [{ cropId: "wheat", expectedQuintals: 50 }, { cropId: "mustard", expectedQuintals: 20 }],
+      consentToCall: true,
+      quietHours: [21, 7],
+      lastSnapshot: { atISO: now, bestMandiId: "lucknow", netPerQuintal: 2380, signal: "WAIT" },
+      alertHistory: [],
+    },
+    {
+      phone: "+919820010002", name: "Ramesh Yadav",
+      lat: 26.42, lng: 80.33, locationLabel: "Kanpur Nagar", lang: "hi",
+      crops: [{ cropId: "paddy", expectedQuintals: 80 }],
+      consentToCall: true, alertHistory: [],
+    },
+    {
+      phone: "+919820010003", name: "Sunita Devi",
+      lat: 27.57, lng: 80.68, locationLabel: "Sitapur", lang: "hi",
+      crops: [{ cropId: "potato", expectedQuintals: 120 }],
+      consentToCall: false, alertHistory: [],
+    },
+    {
+      phone: "+919820010004", name: "Imran Khan",
+      lat: 26.92, lng: 81.18, locationLabel: "Barabanki", lang: "hi",
+      crops: [{ cropId: "arhar", expectedQuintals: 30 }],
+      consentToCall: true, alertHistory: [],
+    },
+    {
+      phone: "+919820010005", name: "Lakshmi Prasad",
+      lat: 27.13, lng: 81.96, locationLabel: "Gonda", lang: "hi",
+      crops: [{ cropId: "tomato", expectedQuintals: 15 }],
+      consentToCall: true, alertHistory: [],
+    },
+    {
+      phone: "+919820010006", name: "Vijay Singh",
+      lat: 26.22, lng: 81.23, locationLabel: "Rae Bareli", lang: "hi",
+      crops: [{ cropId: "mustard", expectedQuintals: 40 }],
+      consentToCall: false, alertHistory: [],
+    },
+  ];
 }
 
-/** Seed an empty store with the demo farmer so the dashboard shows something. */
+/** Seed an empty store so the dashboard/admin show something on first run. */
 function withSeed(store: Store): Store {
-  if (Object.keys(store).length === 0) store[DEMO_PHONE] = demoProfile();
+  if (Object.keys(store).length === 0) {
+    for (const f of seedFarmers()) store[f.phone] = f;
+  }
   return store;
 }
 

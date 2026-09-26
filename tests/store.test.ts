@@ -72,7 +72,7 @@ test("persistQueryAndSnapshot creates a profile for a new phone (lazy builder)",
   } as unknown as import("@/lib/types").OpportunityResult;
   await persistQueryAndSnapshot({
     phone,
-    crop: "soybean",
+    crop: "maize",
     quantityQuintals: 40,
     lat: 22.9,
     lng: 76.0,
@@ -81,7 +81,7 @@ test("persistQueryAndSnapshot creates a profile for a new phone (lazy builder)",
   });
   const p = await store.get(phone);
   assert.ok(p, "profile created from a query");
-  assert.equal(p?.crops[0]?.cropId, "soybean");
+  assert.equal(p?.crops[0]?.cropId, "maize");
   assert.equal(p?.crops[0]?.expectedQuintals, 40);
   assert.equal(p?.lastSnapshot?.bestMandiId, "dewas");
   assert.equal(p?.lastSnapshot?.signal, "SELL");

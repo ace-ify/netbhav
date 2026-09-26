@@ -36,7 +36,7 @@ const findBestMandi = llm.tool({
   parameters: z.object({
     crop: z
       .string()
-      .describe('Crop id, one of: wheat, soybean, gram, onion, garlic, mustard'),
+      .describe('The crop the farmer named, as a lowercase English word (e.g. paddy, wheat, potato, mustard, arhar, gram, maize, onion, garlic, tomato, carrot — or ANY other crop). Pass it through; the tool resolves it.'),
     quantityQuintals: z.number().describe('Quantity in quintals (1 tonne = 10 quintal)'),
     location: z
       .string()
@@ -61,6 +61,7 @@ function createAgent() {
       "Detect and MIRROR the farmer's language — reply in Hindi if they speak Hindi, English if English. " +
       'Your goal: tell them which nearby mandi pays the most AFTER transport, commission and fees. ' +
       'When you have crop + quantity (location optional), call findBestMandi. ' +
+      'The farmer may name ANY crop — never say you only support a fixed list; always pass the crop to findBestMandi. If the tool returns no mandi for that crop, tell them no nearby mandi is buying it right now. ' +
       'Then say, briefly and naturally: the best mandi and district, the net take-home (total and per quintal), ' +
       'roughly how far it is, and how many more rupees it is than chasing the highest sticker price. ' +
       'Add the SELL/WAIT/MONITOR trend hint in one short phrase. Keep replies short — this is a phone call. ' +
