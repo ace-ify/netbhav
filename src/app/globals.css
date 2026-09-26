@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: "Segoe UI", system-ui, "Noto Sans Devanagari", sans-serif;
+  /* Inter drives the sans stack; kept as a var so Leaflet chrome can borrow it. */
+  --font-sans: var(--font-inter), "Segoe UI", system-ui, "Noto Sans Devanagari", sans-serif;
 }
 
 html {
@@ -11,7 +12,40 @@ html {
 }
 
 body {
-  @apply bg-brand-50 text-brand-900 antialiased;
+  @apply bg-neutral-50 text-neutral-900 antialiased;
+  /* GrainBot template quirk — keep the alt figures/stylistic set on. */
+  font-feature-settings: "cv11", "ss01";
+}
+
+::selection {
+  @apply bg-neutral-200;
+}
+
+/* ---- Signature effects (design.md §3) — exact template values ---- */
+
+/* Glass nav */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Diagonal photo clip */
+.clip-image {
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+}
+
+/* Accordion smooth height (React drives data-open) */
+.acc-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+.acc-row[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+.acc-row > div {
+  overflow: hidden;
 }
 
 /* Number readouts should feel weighty and honest. */
@@ -19,15 +53,38 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Leaflet controls shouldn't fight our green UI. */
+/* Leaflet controls shouldn't fight our neutral UI. */
 .leaflet-container {
   font-family: var(--font-sans);
 }
 
 @keyframes pop {
-  0% { transform: scale(0.96); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 .animate-pop {
   animation: pop 0.35s ease-out both;
+}
+
+/* Respect reduced-motion (design.md §9): kill cross-fades, transforms, smooth scroll. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .acc-row {
+    transition: none;
+  }
 }

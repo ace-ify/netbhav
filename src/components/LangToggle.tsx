@@ -10,13 +10,13 @@ export default function LangToggle({
   onChange: (l: Lang) => void;
 }) {
   return (
-    <div className="inline-flex rounded-full border border-brand-200 bg-white p-0.5 text-sm shadow-sm">
+    <div className="inline-flex rounded-full border border-neutral-200 bg-white p-0.5 text-sm shadow-sm">
       {(["hi", "en"] as Lang[]).map((l) => (
         <button
           key={l}
           onClick={() => onChange(l)}
           className={`rounded-full px-3 py-1 font-medium transition ${
-            lang === l ? "bg-brand-600 text-white" : "text-brand-700 hover:bg-brand-50"
+            lang === l ? "bg-neutral-900 text-white" : "text-neutral-700 hover:bg-neutral-100"
           }`}
           aria-pressed={lang === l}
         >

@@ -140,28 +140,28 @@ export default function VoiceCall({
           : t(lang, "callTapToStart");
 
   return (
-    <div className="fixed inset-0 z-[1100] flex flex-col items-center justify-between bg-brand-800/95 p-6 text-white backdrop-blur">
+    <div className="fixed inset-0 z-[1100] flex flex-col items-center justify-between bg-neutral-900/95 p-6 text-white backdrop-blur">
       <div className="mt-6 text-center">
-        <div className="text-sm uppercase tracking-widest text-brand-200">{t(lang, "voiceCall")}</div>
+        <div className="text-sm uppercase tracking-widest text-neutral-400">{t(lang, "voiceCall")}</div>
         <div className="mt-1 text-lg font-semibold">NetBhav</div>
       </div>
 
       {!SR ? (
-        <p className="max-w-xs text-center text-brand-100">{t(lang, "callUnsupported")}</p>
+        <p className="max-w-xs text-center text-neutral-300">{t(lang, "callUnsupported")}</p>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-6">
           <button
             onClick={() => (phase === "idle" ? listen() : phase === "speaking" ? listen() : undefined)}
             className={`relative flex h-32 w-32 items-center justify-center rounded-full transition ${
               phase === "listening"
-                ? "bg-red-500"
+                ? "bg-loss"
                 : phase === "speaking"
-                  ? "bg-gold-500"
-                  : "bg-brand-500"
+                  ? "bg-neutral-600"
+                  : "bg-neutral-700"
             }`}
           >
             {phase === "listening" && (
-              <span className="absolute inset-0 animate-ping rounded-full bg-red-400/50" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-loss/50" />
             )}
             {phase === "thinking" ? (
               <Loader2 className="h-12 w-12 animate-spin" />
@@ -173,9 +173,9 @@ export default function VoiceCall({
           </button>
           <div className="text-lg font-medium">{status}</div>
           <div className="min-h-[3rem] max-w-md text-center">
-            {heard && <p className="text-brand-100">“{heard}”</p>}
+            {heard && <p className="text-neutral-300">“{heard}”</p>}
             {reply && phase !== "listening" && (
-              <p className="mt-2 text-sm text-brand-200">{reply}</p>
+              <p className="mt-2 text-sm text-neutral-400">{reply}</p>
             )}
           </div>
         </div>
@@ -183,7 +183,7 @@ export default function VoiceCall({
 
       <button
         onClick={hangUp}
-        className="mb-4 flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 font-semibold shadow-lg transition hover:bg-red-700"
+        className="mb-4 flex items-center gap-2 rounded-full bg-loss px-6 py-3 font-semibold shadow-lg transition hover:opacity-90"
       >
         <PhoneOff className="h-5 w-5" /> {t(lang, "endCall")}
       </button>

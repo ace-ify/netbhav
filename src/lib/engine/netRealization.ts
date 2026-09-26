@@ -16,6 +16,12 @@ export interface CostInputs {
   routeSource: "osrm" | "haversine";
   params: CostParams;
   fpo?: boolean; // pooled/bulk: pay only your share of a full truck, not a whole trip
+  channel?: "apmc" | "enam" | "doorstep"; // which exit this is (default apmc)
+  enam?: boolean; // APMC yard is also eNAM-integrated
+  /** Override cost model for non-mandi exits (e.g. doorstep: no transport/commission). */
+  noTransport?: boolean;
+  noCommission?: boolean;
+  noSpoilage?: boolean;
 }
 
 export function computeOpportunity(input: CostInputs): MandiOpportunity {
@@ -25,22 +31,30 @@ export function computeOpportunity(input: CostInputs): MandiOpportunity {
 
   // Commission is class-aware: perishables (vegetable 6%, fruit 8%) cost far
   // more than staples (grain/pulse/oilseed/spice 2%). Falls back to the param.
-  const commissionPercent = commissionPercentFor(cropId, params.commissionPercent);
+  // A doorstep/aggregator exit charges no APMC commission or mandi fee.
+  const commissionPercent = input.noCommission
+    ? 0
+    : commissionPercentFor(cropId, params.commissionPercent);
   const commissionCost = round2((grossRevenue * commissionPercent) / 100);
-  const mandiFeeCost = round2((grossRevenue * params.mandiFeePercent) / 100);
-  const cessCost = round2((grossRevenue * params.cessPercent) / 100);
+  const mandiFeeCost = input.noCommission ? 0 : round2((grossRevenue * params.mandiFeePercent) / 100);
+  const cessCost = input.noCommission ? 0 : round2((grossRevenue * params.cessPercent) / 100);
   const hamaliCost = round2(params.hamaliPerQuintal * qty);
 
   // Freight = cheapest vehicle for this load/distance (tata-ace → truck), so a
   // small load isn't billed a full truck. FPO pools into a shared full truck.
-  const freight = freightQuote(qty, input.roadKm, params.roundTrip, input.fpo ?? false);
+  // A doorstep exit has no transport (the buyer picks up at the farm).
+  const freight = input.noTransport
+    ? { cost: 0, vehicle: "doorstep", trips: 0 }
+    : freightQuote(qty, input.roadKm, params.roundTrip, input.fpo ?? false);
   const transportCost = freight.cost;
   const trips = freight.trips;
 
   // Spoilage in transit: perishables lose value with distance/time; staples 0.
-  // fraction = min(cap, base + per100 × roadKm/100).
+  // fraction = min(cap, base + per100 × roadKm/100). Doorstep sale → ~none.
   const w = wastageParamsFor(cropId);
-  const wastageFraction = Math.min(w.cap, w.base + (w.per100 * input.roadKm) / 100);
+  const wastageFraction = input.noSpoilage
+    ? 0
+    : Math.min(w.cap, w.base + (w.per100 * input.roadKm) / 100);
   const wastageCost = round2(grossRevenue * wastageFraction);
 
   const totalDeductions = round2(
@@ -71,6 +85,8 @@ export function computeOpportunity(input: CostInputs): MandiOpportunity {
     effectiveCostPerKm: input.roadKm > 0 ? round2(transportCost / input.roadKm) : 0,
     rank: 0,
     deltaVsBest: 0,
+    channel: input.channel ?? "apmc",
+    enam: input.enam,
   };
 }
 

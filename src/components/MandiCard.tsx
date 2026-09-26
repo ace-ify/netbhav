@@ -43,6 +43,15 @@ export default function MandiCard({
                 {t(lang, "bestTakeHome")}
               </span>
             )}
+            {o.channel === "doorstep" ? (
+              <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">
+                {t(lang, "chDoorstep")}
+              </span>
+            ) : o.enam ? (
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">
+                {t(lang, "chEnam")}
+              </span>
+            ) : null}
           </div>
           <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-brand-500">
             <span>{o.mandi.district}</span>

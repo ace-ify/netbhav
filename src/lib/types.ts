@@ -15,6 +15,7 @@ export interface Crop {
   name: LocalizedText;
   emoji: string;
   class: CropClass; // drives commission rate + spoilage behaviour
+  storable: boolean; // can it be held to wait for a better price? (gates WAIT advice)
 }
 
 export interface Mandi {
@@ -24,6 +25,7 @@ export interface Mandi {
   state: string;
   lat: number;
   lng: number;
+  enam?: boolean; // yard is integrated with the eNAM national e-market
 }
 
 /** A daily price observation for one crop at one mandi. */
@@ -73,6 +75,8 @@ export interface OpportunityQuery {
   lng: number;
   maxDistanceKm?: number; // filter out mandis farther than this
   fpo?: boolean; // bulk/FPO mode — pooled quantity, better per-unit economics
+  /** Optional aggregator/doorstep quote (₹/qtl) — a neutral non-mandi exit to rank. */
+  doorstepQuotePerQuintal?: number;
 }
 
 /** One mandi, fully costed, ready to rank. This is the honest money math. */
@@ -102,6 +106,8 @@ export interface MandiOpportunity {
 
   rank: number; // 1 = best net realization
   deltaVsBest: number; // netRealization - best.netRealization (≤ 0)
+  channel: "apmc" | "enam" | "doorstep"; // which exit this is
+  enam?: boolean; // APMC yard is also eNAM-integrated (reach distant buyers)
 }
 
 /** The full ranked answer + the headline insight. */
@@ -121,7 +127,15 @@ export interface OpportunityResult {
     source: "agmarknet" | "seed" | "mixed";
     freshness: "live" | "cached" | "seed";
     fetchedAt: string;
+    asOf?: string; // latest arrival_date across records (ISO)
+    lagDays?: number; // how many days stale the freshest price is
   };
   /** SELL/WAIT/MONITOR signal for the crop. `real` = derived from live history. */
   advisory?: { signal: "SELL" | "WAIT" | "MONITOR"; changePct: number; real: boolean };
+  /** Honest break-even: how far the best option's price could fall and still beat the nearest. */
+  breakEven?: { vsMandiId: string; bestPricePerQuintal: number; floorPerQuintal: number; marginPerQuintal: number };
+  /** Pooling-as-a-lever: what pooling into a full load would unlock vs selling solo. */
+  pooling?: { soloBestMandiId: string; pooledBestMandiId: string; gainPerQuintal: number; unlocksFarther: boolean };
+  /** Overall confidence in the recommendation, from freshness + lag + spoilage uncertainty. */
+  confidence?: { level: "high" | "medium" | "low"; reasons: string[] };
 }

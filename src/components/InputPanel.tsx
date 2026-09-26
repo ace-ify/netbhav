@@ -18,6 +18,7 @@ export interface SolveInput {
   label?: string;
   maxDistanceKm?: number;
   fpo?: boolean;
+  doorstepQuotePerQuintal?: number;
 }
 
 export default function InputPanel({
@@ -45,6 +46,7 @@ export default function InputPanel({
   );
   const [maxKm, setMaxKm] = useState<number | "">(initial?.maxDistanceKm ?? "");
   const [fpo, setFpo] = useState(Boolean(initial?.fpo));
+  const [doorstep, setDoorstep] = useState<number | "">(initial?.doorstepQuotePerQuintal ?? "");
   const [geoBusy, setGeoBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -100,21 +102,22 @@ export default function InputPanel({
       label: text,
       maxDistanceKm: maxKm === "" ? undefined : Number(maxKm),
       fpo,
+      doorstepQuotePerQuintal: doorstep === "" ? undefined : Number(doorstep),
     });
   }
 
   return (
-    <div className="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm sm:p-6">
-      <label className="mb-2 block text-sm font-semibold text-brand-700">{t(lang, "crop")}</label>
+    <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+      <label className="mb-2 block text-sm font-500 text-neutral-700">{t(lang, "crop")}</label>
       <div className="mb-5 flex flex-wrap gap-2">
         {crops.map((c) => (
           <button
             key={c.id}
             onClick={() => setCrop(c.id)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition ${
               crop === c.id
-                ? "border-brand-600 bg-brand-600 text-white"
-                : "border-brand-200 bg-brand-50 text-brand-800 hover:border-brand-400"
+                ? "border-neutral-900 bg-neutral-900 text-white"
+                : "border-neutral-200 bg-neutral-50 text-neutral-800 hover:border-neutral-400"
             }`}
           >
             <span aria-hidden>{c.emoji}</span>
@@ -125,7 +128,7 @@ export default function InputPanel({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-sm font-semibold text-brand-700">
+          <label className="mb-2 block text-sm font-500 text-neutral-700">
             {t(lang, "quantity")} ({t(lang, "quintals")})
           </label>
           <input
@@ -133,17 +136,17 @@ export default function InputPanel({
             min={1}
             value={qty}
             onChange={(e) => setQty(Number(e.target.value))}
-            className="w-full rounded-xl border border-brand-200 px-3 py-2.5 text-lg tabular outline-none focus:border-brand-500"
+            className="w-full min-h-12 rounded-xl border border-neutral-300 px-3 py-2.5 text-lg tabular outline-none focus:border-neutral-900"
           />
         </div>
         <div>
-          <label className="mb-2 block text-sm font-semibold text-brand-700">
+          <label className="mb-2 block text-sm font-500 text-neutral-700">
             {t(lang, "withinKm")} ({t(lang, "km")})
           </label>
           <select
             value={maxKm}
             onChange={(e) => setMaxKm(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-full rounded-xl border border-brand-200 bg-white px-3 py-2.5 text-lg outline-none focus:border-brand-500"
+            className="w-full min-h-12 rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-lg outline-none focus:border-neutral-900"
           >
             <option value="">{t(lang, "anyDistance")}</option>
             <option value={50}>50</option>
@@ -153,12 +156,12 @@ export default function InputPanel({
         </div>
       </div>
 
-      <label className="mb-2 mt-4 block text-sm font-semibold text-brand-700">
+      <label className="mb-2 mt-4 block text-sm font-500 text-neutral-700">
         {t(lang, "location")}
       </label>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" />
+          <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
             value={text}
             onChange={(e) => {
@@ -167,13 +170,13 @@ export default function InputPanel({
             }}
             onBlur={() => !coords && resolveText()}
             placeholder={t(lang, "locationPlaceholder")}
-            className="w-full rounded-xl border border-brand-200 py-2.5 pl-9 pr-3 outline-none focus:border-brand-500"
+            className="w-full min-h-12 rounded-xl border border-neutral-300 py-2.5 pl-9 pr-3 text-lg outline-none focus:border-neutral-900"
           />
         </div>
         <button
           onClick={useMyLocation}
           title={t(lang, "useMyLocation")}
-          className="flex items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50 px-3 text-sm font-medium text-brand-700 hover:border-brand-400"
+          className="flex min-h-12 items-center gap-1.5 rounded-xl border border-neutral-300 bg-neutral-50 px-3 text-sm font-medium text-neutral-700 hover:border-neutral-400"
         >
           {geoBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
         </button>
@@ -182,27 +185,42 @@ export default function InputPanel({
       <button
         onClick={() => setFpo((v) => !v)}
         className={`mt-4 flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition ${
-          fpo ? "border-gold-500 bg-gold-400/10" : "border-brand-200 bg-white"
+          fpo ? "border-neutral-900 bg-neutral-100" : "border-neutral-200 bg-white"
         }`}
       >
-        <Users className={`h-5 w-5 ${fpo ? "text-gold-600" : "text-brand-400"}`} />
+        <Users className={`h-5 w-5 ${fpo ? "text-neutral-900" : "text-neutral-400"}`} />
         <span>
-          <span className="font-semibold text-brand-800">{t(lang, "fpoMode")}</span>
-          <span className="block text-xs text-brand-600">{t(lang, "fpoHint")}</span>
+          <span className="font-500 text-neutral-800">{t(lang, "fpoMode")}</span>
+          <span className="block text-xs text-neutral-500">{t(lang, "fpoHint")}</span>
         </span>
         <span
-          className={`ml-auto h-5 w-9 rounded-full p-0.5 transition ${fpo ? "bg-gold-500" : "bg-brand-200"}`}
+          className={`ml-auto h-5 w-9 rounded-full p-0.5 transition ${fpo ? "bg-neutral-900" : "bg-neutral-200"}`}
         >
           <span className={`block h-4 w-4 rounded-full bg-white transition ${fpo ? "translate-x-4" : ""}`} />
         </span>
       </button>
 
-      {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
+      <label className="mb-1 mt-4 block text-sm font-500 text-neutral-700">
+        {t(lang, "doorstepQuote")}
+      </label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">₹</span>
+        <input
+          type="number"
+          min={0}
+          value={doorstep}
+          onChange={(e) => setDoorstep(e.target.value === "" ? "" : Number(e.target.value))}
+          placeholder={lang === "hi" ? "जैसे 1900 (एजेंट/घर-पहुँच भाव)" : "e.g. 1900 (aggregator pickup)"}
+          className="w-full min-h-12 rounded-xl border border-neutral-300 py-2.5 pl-7 pr-3 text-lg tabular outline-none focus:border-neutral-900"
+        />
+      </div>
+
+      {err && <p className="mt-3 text-sm text-loss">{err}</p>}
 
       <button
         onClick={submit}
         disabled={loading}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-lg font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-60"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3.5 text-lg font-500 text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-60"
       >
         {loading ? (
           <>

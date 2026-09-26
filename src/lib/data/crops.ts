@@ -3,12 +3,12 @@ import type { Crop, CropClass } from "@/lib/types";
 // The six crops NetBhav's seed data covers. `agmarknet` = commodity name in the
 // price feed; `class` drives commission rate and spoilage behaviour.
 export const CROPS: (Crop & { agmarknet: string })[] = [
-  { id: "wheat", name: { en: "Wheat", hi: "गेहूं" }, emoji: "🌾", class: "grain", agmarknet: "Wheat" },
-  { id: "soybean", name: { en: "Soybean", hi: "सोयाबीन" }, emoji: "🫘", class: "oilseed", agmarknet: "Soyabean" },
-  { id: "gram", name: { en: "Gram (Chana)", hi: "चना" }, emoji: "🟤", class: "pulse", agmarknet: "Bengal Gram(Gram)(Whole)" },
-  { id: "onion", name: { en: "Onion", hi: "प्याज" }, emoji: "🧅", class: "vegetable", agmarknet: "Onion" },
-  { id: "garlic", name: { en: "Garlic", hi: "लहसुन" }, emoji: "🧄", class: "spice", agmarknet: "Garlic" },
-  { id: "mustard", name: { en: "Mustard", hi: "सरसों" }, emoji: "🌱", class: "oilseed", agmarknet: "Mustard" },
+  { id: "wheat", name: { en: "Wheat", hi: "गेहूं" }, emoji: "🌾", class: "grain", storable: true, agmarknet: "Wheat" },
+  { id: "soybean", name: { en: "Soybean", hi: "सोयाबीन" }, emoji: "🫘", class: "oilseed", storable: true, agmarknet: "Soyabean" },
+  { id: "gram", name: { en: "Gram (Chana)", hi: "चना" }, emoji: "🟤", class: "pulse", storable: true, agmarknet: "Bengal Gram(Gram)(Whole)" },
+  { id: "onion", name: { en: "Onion", hi: "प्याज" }, emoji: "🧅", class: "vegetable", storable: true, agmarknet: "Onion" },
+  { id: "garlic", name: { en: "Garlic", hi: "लहसुन" }, emoji: "🧄", class: "spice", storable: true, agmarknet: "Garlic" },
+  { id: "mustard", name: { en: "Mustard", hi: "सरसों" }, emoji: "🌱", class: "oilseed", storable: true, agmarknet: "Mustard" },
 ];
 
 export const CROP_BY_ID = new Map(CROPS.map((c) => [c.id, c]));
@@ -17,7 +17,7 @@ export function getCrop(id: string): Crop & { agmarknet: string } {
   const c = CROP_BY_ID.get(id);
   if (c) return c;
   // Unknown crop → synthesize a passthrough so the engine still works.
-  return { id, name: { en: id, hi: id }, emoji: "🌿", class: "grain", agmarknet: id };
+  return { id, name: { en: id, hi: id }, emoji: "🌿", class: "grain", storable: true, agmarknet: id };
 }
 
 // ── Crop economics (the heart of PS-02: honest, class-aware money math) ──────
@@ -39,18 +39,26 @@ export interface WastageParams {
   cap: number; // max fraction (long hauls plateau)
 }
 
-// Distance/time spoilage knobs, as-of 2025-26. Crops absent here spoil 0
-// (grain/pulse/oilseed keep for months). Cured garlic also stores for months —
-// deliberately LOW, NOT treated like onion.
+// Whole-chain spoilage anchors from the national post-harvest loss studies —
+// ICAR-CIPHET (2015) and NABCONS (2022): Vegetables 4.6–12.4%, Fruits 6.7–15.9%,
+// cereals/pulses/oilseeds low single digits. We deliberately anchor to THESE
+// (NOT the inflated 30–40% review-paper figure). Distance-scaled: fraction =
+// min(cap, base + per100 × roadKm/100). All tunable. `cap` stays inside the
+// study range for that class. Cured garlic stores for months → deliberately low.
 const WASTAGE_BY_CROP: Record<string, WastageParams> = {
-  onion: { base: 0.04, per100: 0.015, cap: 0.12 },
-  garlic: { base: 0.01, per100: 0.003, cap: 0.04 },
-  tomato: { base: 0.08, per100: 0.03, cap: 0.2 }, // wired for future crops
-  potato: { base: 0.04, per100: 0.01, cap: 0.15 }, // wired for future crops
+  onion: { base: 0.04, per100: 0.015, cap: 0.12 }, // veg range 4.6–12.4%
+  garlic: { base: 0.01, per100: 0.003, cap: 0.04 }, // storable spice, well below range
+  tomato: { base: 0.05, per100: 0.02, cap: 0.13 }, // perishable end of the veg range
+  potato: { base: 0.03, per100: 0.008, cap: 0.1 }, // storable tuber, low end
 };
 
 export function cropClass(cropId: string): CropClass {
   return CROP_BY_ID.get(cropId)?.class ?? "grain";
+}
+
+/** Can this crop be held to wait for a better price? Gates WAIT/hold advice. */
+export function isStorable(cropId: string): boolean {
+  return CROP_BY_ID.get(cropId)?.storable ?? true;
 }
 
 /** Commission % for a crop's class; falls back to the given default if unknown. */

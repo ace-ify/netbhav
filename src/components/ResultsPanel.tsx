@@ -7,6 +7,7 @@ import type { Lang, OpportunityResult } from "@/lib/types";
 import { inr, t } from "@/lib/i18n";
 import InsightBanner from "./InsightBanner";
 import MandiCard from "./MandiCard";
+import SeasonView from "./SeasonView";
 
 const MandiMap = dynamic(() => import("./MandiMap"), {
   ssr: false,
@@ -46,9 +47,31 @@ export default function ResultsPanel({
       <InsightBanner lang={lang} result={result} />
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-brand-500">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <FreshnessBadge lang={lang} meta={result.priceMeta} />
-          <span>{result.opportunities.length} {lang === "hi" ? "मंडियाँ" : "mandis"}</span>
+          {result.confidence && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                result.confidence.level === "high"
+                  ? "bg-green-100 text-green-700"
+                  : result.confidence.level === "medium"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-red-100 text-red-700"
+              }`}
+              title={result.confidence.reasons.join(" · ")}
+            >
+              {t(lang, "confidence")}:{" "}
+              {t(lang, result.confidence.level === "high" ? "confHigh" : result.confidence.level === "medium" ? "confMedium" : "confLow")}
+            </span>
+          )}
+          {result.priceMeta.asOf && (
+            <span>
+              {t(lang, "pricesAsOf")} {result.priceMeta.asOf}
+              {result.priceMeta.lagDays != null &&
+                ` · ${result.priceMeta.lagDays === 0 ? t(lang, "today") : `${result.priceMeta.lagDays} ${t(lang, "daysOld")}`}`}
+            </span>
+          )}
+          <span>{result.opportunities.length} {lang === "hi" ? "विकल्प" : "options"}</span>
         </div>
         <button
           onClick={() => setShowAssume((v) => !v)}
@@ -57,6 +80,35 @@ export default function ResultsPanel({
           <Info className="h-3.5 w-3.5" /> {t(lang, "assumptions")}
         </button>
       </div>
+
+      {(result.breakEven || result.pooling) && (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {result.breakEven && result.breakEven.marginPerQuintal > 0 && (
+            <div className="rounded-xl border border-brand-200 bg-white p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-wide text-brand-500">
+                {t(lang, "breakEvenTitle")}
+              </div>
+              <p className="mt-1 text-brand-800">
+                {lang === "hi"
+                  ? `भाव ₹${result.breakEven.floorPerQuintal}/क्विंटल तक गिरने पर भी यही सबसे अच्छा — ₹${result.breakEven.marginPerQuintal}/क्विंटल की गुंजाइश।`
+                  : `Still the best even if its price fell to ₹${result.breakEven.floorPerQuintal}/qtl — a ₹${result.breakEven.marginPerQuintal}/qtl cushion.`}
+              </p>
+            </div>
+          )}
+          {result.pooling && result.pooling.gainPerQuintal > 0 && (
+            <div className="rounded-xl border border-gold-500 bg-gold-400/10 p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gold-600">
+                {t(lang, "poolTitle")}
+              </div>
+              <p className="mt-1 text-brand-800">
+                {lang === "hi"
+                  ? `पूरे ट्रक में मिलाकर बेचें → +₹${result.pooling.gainPerQuintal}/क्विंटल${result.pooling.unlocksFarther ? " (दूर की बेहतर मंडी खुलती है)" : ""}।`
+                  : `Pool into a full truckload → +₹${result.pooling.gainPerQuintal}/qtl${result.pooling.unlocksFarther ? " (unlocks a farther, better mandi)" : ""}.`}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {showAssume && (
         <div className="rounded-xl border border-brand-200 bg-white p-3 text-xs text-brand-600">
@@ -81,6 +133,8 @@ export default function ResultsPanel({
           onSelect={setSelected}
         />
       </div>
+
+      <SeasonView lang={lang} cropId={cropId} />
 
       <div>
         <h3 className="mb-2 text-sm font-semibold text-brand-700">{t(lang, "allMandis")}</h3>

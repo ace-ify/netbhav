@@ -17,7 +17,7 @@ interface Msg {
 }
 
 const PANEL =
-  "fixed bottom-24 right-5 z-[1000] flex h-[70vh] max-h-[560px] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-2xl";
+  "fixed bottom-24 right-5 z-[1000] flex h-[70vh] max-h-[560px] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl";
 
 export default function ChatWidget({
   lang,
@@ -134,7 +134,7 @@ export default function ChatWidget({
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition hover:bg-brand-700"
+        className="fixed bottom-5 right-5 z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-lg transition hover:bg-neutral-800"
         aria-label={t(lang, "chatTitle")}
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
@@ -155,7 +155,7 @@ export default function ChatWidget({
         </div>
       ) : open ? (
         <div className={PANEL}>
-          <div className="flex items-center gap-2 bg-brand-600 px-4 py-3 text-white">
+          <div className="flex items-center gap-2 bg-neutral-900 px-4 py-3 text-white">
             <MessageCircle className="h-5 w-5" />
             <span className="font-semibold">{t(lang, "chatTitle")}</span>
             {canCall && (
@@ -171,20 +171,20 @@ export default function ChatWidget({
 
           <div className="flex-1 space-y-3 overflow-y-auto p-3">
             {msgs.length === 0 && (
-              <p className="mt-6 text-center text-sm text-brand-400">{t(lang, "chatPlaceholder")}</p>
+              <p className="mt-6 text-center text-sm text-neutral-400">{t(lang, "chatPlaceholder")}</p>
             )}
             {msgs.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${
-                    m.role === "user" ? "bg-brand-600 text-white" : "bg-brand-50 text-brand-900"
+                    m.role === "user" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-900"
                   }`}
                 >
                   {m.content}
                   {m.role === "assistant" && (
                     <button
                       onClick={() => speak(m.content)}
-                      className="ml-2 text-brand-400 hover:text-brand-600"
+                      className="ml-2 text-neutral-400 hover:text-neutral-700"
                       aria-label={lang === "hi" ? "सुनें" : "Listen"}
                     >
                       <Volume2 className="inline h-3.5 w-3.5" />
@@ -195,20 +195,20 @@ export default function ChatWidget({
             ))}
             {busy && (
               <div className="flex justify-start">
-                <div className="rounded-2xl bg-brand-50 px-3 py-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
+                <div className="rounded-2xl bg-neutral-100 px-3 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2 border-t border-brand-100 p-2">
+          <div className="flex items-center gap-2 border-t border-neutral-100 p-2">
             <button
               onClick={toggleMic}
               disabled={!micSupported}
               title={micSupported ? t(lang, "speak") : t(lang, "callUnsupported")}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full disabled:opacity-40 ${
-                listening ? "animate-pulse bg-red-500 text-white" : "bg-brand-50 text-brand-600"
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full disabled:opacity-40 ${
+                listening ? "animate-pulse bg-loss text-white" : "bg-neutral-100 text-neutral-700"
               }`}
               aria-label={t(lang, "speak")}
             >
@@ -219,12 +219,12 @@ export default function ChatWidget({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send(input)}
               placeholder={listening ? t(lang, "listening") : t(lang, "chatPlaceholder")}
-              className="flex-1 rounded-full border border-brand-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
+              className="flex-1 rounded-full border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
             />
             <button
               onClick={() => send(input)}
               disabled={busy}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white disabled:opacity-50"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white disabled:opacity-50"
               aria-label={t(lang, "send")}
             >
               <Send className="h-5 w-5" />

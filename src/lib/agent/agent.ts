@@ -17,6 +17,8 @@ export interface AgentInput {
   lang?: Lang;
   location?: { lat: number; lng: number } | null;
   maxDistanceKm?: number;
+  /** Fallback crop/qty from a saved profile — used only when the message omits them. */
+  defaults?: { crop?: string; quantityQuintals?: number };
 }
 
 export interface AgentReply {
@@ -38,9 +40,10 @@ export async function runAgent(input: AgentInput): Promise<AgentReply> {
   const rule = parseIntent(text);
   const llm = await extractIntentLLM(text).catch(() => null);
 
-  let crop = llm?.crop ?? rule.crop;
+  let crop = llm?.crop ?? rule.crop ?? input.defaults?.crop;
   if (crop && !CROP_IDS.has(crop)) crop = undefined; // guard against off-menu crops
-  const quantityQuintals = llm?.quantityQuintals ?? rule.quantityQuintals;
+  const quantityQuintals =
+    llm?.quantityQuintals ?? rule.quantityQuintals ?? input.defaults?.quantityQuintals;
   const locationText = llm?.locationText ?? rule.locationText;
   const fpo = llm?.fpo ?? rule.fpo;
 

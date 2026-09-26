@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { inter, oswald } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,8 +18,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${inter.variable} ${oswald.variable}`}>
+      <body className="bg-neutral-50 font-sans text-neutral-900 antialiased">{children}</body>
     </html>
   );
 }
