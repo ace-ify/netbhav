@@ -125,6 +125,14 @@ export default function InputPanel({
           </button>
         ))}
       </div>
+      {/* Any crop, not just the chips — backend fuzzy-resolves Hindi/English/typos. */}
+      <input
+        type="text"
+        value={crop}
+        onChange={(e) => setCrop(e.target.value)}
+        placeholder={lang === "hi" ? "या कोई भी फसल लिखें (जैसे बाजरा, मेथी)" : "or type any crop (e.g. bajra, methi)"}
+        className="mb-5 min-h-12 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-base outline-none transition focus:border-neutral-900"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

@@ -17,7 +17,7 @@ interface Meta {
 }
 
 export default function AppPage() {
-  const [lang, setLang] = useState<Lang>("hi");
+  const [lang, setLang] = useState<Lang>("en");
   const [meta, setMeta] = useState<Meta | null>(null);
   const [result, setResult] = useState<OpportunityResult | null>(null);
   const [farmer, setFarmer] = useState<{ lat: number; lng: number; label?: string } | null>(null);

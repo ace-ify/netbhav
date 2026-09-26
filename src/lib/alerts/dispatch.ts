@@ -34,16 +34,46 @@ export async function sendWhatsApp(toPhone: string, message: string): Promise<Se
   }
 }
 
-// ponytail: high-₹ alerts should escalate to an OUTBOUND VOICE CALL. Wiring the
-// trigger here, but end-to-end needs live LiveKit SIP + an Exotel/Plivo India
-// number + DLT consent — the WhatsApp path above is the verifiable one.
-export async function placeOutboundCall(phone: string): Promise<SendResult> {
-  const configured = Boolean(
-    process.env.LIVEKIT_SIP_TRUNK_ID && process.env.LIVEKIT_URL && process.env.LIVEKIT_API_KEY
-  );
-  if (!configured) return { sent: false, reason: "livekit SIP not configured" };
-  // TODO: use livekit-server-sdk SipClient.createSipParticipant(trunk, phone, room)
-  // to dial the farmer into the agent room. Left as a stub pending live SIP creds.
-  void phone;
-  return { sent: false, reason: "SIP dial stub — pending live trunk" };
+// High-₹ alerts (and manual/admin triggers) escalate to an OUTBOUND VOICE CALL
+// via LiveKit SIP: we spin up a room, bring the voice agent in, then dial the
+// farmer's phone into that room over the Twilio SIP trunk. Degrades gracefully
+// to sent:false if creds are absent. Needs a running agent worker (`npm run agent`).
+export async function placeOutboundCall(
+  phone: string,
+  opts?: { room?: string }
+): Promise<SendResult> {
+  const url = process.env.LIVEKIT_URL;
+  const key = process.env.LIVEKIT_API_KEY;
+  const secret = process.env.LIVEKIT_API_SECRET;
+  const trunk = process.env.LIVEKIT_SIP_TRUNK_ID;
+  if (!url || !key || !secret || !trunk) return { sent: false, reason: "livekit SIP not configured" };
+
+  // SipClient wants an http(s) host, not the wss:// realtime URL.
+  const host = url.replace(/^wss:/, "https:").replace(/^ws:/, "http:");
+  const room = opts?.room || `netbhav-call-${Date.now()}`;
+  try {
+    const { SipClient, AgentDispatchClient } = await import("livekit-server-sdk");
+
+    // Bring the NetBhav voice agent into the room (best-effort — needs a
+    // registered worker + LIVEKIT_AGENT_NAME; the call still connects without it).
+    const agentName = process.env.LIVEKIT_AGENT_NAME;
+    if (agentName) {
+      try {
+        const ad = new AgentDispatchClient(host, key, secret);
+        await ad.createDispatch(room, agentName, { metadata: JSON.stringify({ phone }) });
+      } catch {
+        /* dispatch optional */
+      }
+    }
+
+    const sip = new SipClient(host, key, secret);
+    await sip.createSipParticipant(trunk, phone, room, {
+      participantIdentity: `farmer-${phone}`,
+      participantName: "Farmer",
+      krispEnabled: true,
+    });
+    return { sent: true };
+  } catch (e) {
+    return { sent: false, reason: e instanceof Error ? e.message : "sip dial failed" };
+  }
 }
