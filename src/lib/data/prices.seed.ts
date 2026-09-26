@@ -97,6 +97,20 @@ const TOMATO: Row[] = [
   ["sitapur", 1880, 790, 3450], ["hardoi", 1830, 770, 3380],
 ];
 
+// CARROT (Gajar) — storable winter vegetable.
+const CARROT: Row[] = [
+  ["lucknow", 1600, 900, 2400], ["barabanki", 1550, 880, 2350],
+  ["unnao", 1520, 860, 2300], ["hardoi", 1580, 890, 2380],
+  ["sitapur", 1560, 880, 2360], ["kanpur", 1640, 920, 2450],
+];
+
+// PEAS (Matar) — winter vegetable, perishable.
+const PEAS: Row[] = [
+  ["lucknow", 3200, 1800, 5000], ["barabanki", 3150, 1750, 4900],
+  ["sitapur", 3250, 1850, 5100], ["hardoi", 3180, 1800, 4950],
+  ["unnao", 3120, 1750, 4850], ["kanpur", 3300, 1900, 5200],
+];
+
 function toRecords(crop: string, rows: Row[]): PriceRecord[] {
   return rows.map(([mandiId, modal, min, max]) => ({
     mandiId,
@@ -120,6 +134,8 @@ export const SEED_PRICES: PriceRecord[] = [
   ...toRecords("onion", ONION),
   ...toRecords("garlic", GARLIC),
   ...toRecords("tomato", TOMATO),
+  ...toRecords("carrot", CARROT),
+  ...toRecords("peas", PEAS),
 ];
 
 export function seedPricesFor(crop: string): PriceRecord[] {

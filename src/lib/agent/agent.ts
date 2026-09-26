@@ -5,7 +5,7 @@ import type { Lang, OpportunityQuery, OpportunityResult } from "@/lib/types";
 import { solveOpportunity } from "@/lib/service";
 import { advise } from "@/lib/engine";
 import { trendFor } from "@/lib/data/prices.seed";
-import { CROPS } from "@/lib/data/crops";
+import { getCrop } from "@/lib/data/crops";
 import { DEMO_FARMER } from "@/lib/data/mandis";
 import { geocode } from "@/lib/geo/nominatim";
 import { inr } from "@/lib/i18n";
@@ -28,7 +28,6 @@ export interface AgentReply {
   usedFallbackLocation?: boolean;
 }
 
-const CROP_IDS = new Set(CROPS.map((c) => c.id));
 const hasDevanagari = (s: string) => /[ऀ-ॿ]/.test(s);
 const round = (n: number) => Math.round(n);
 
@@ -41,7 +40,9 @@ export async function runAgent(input: AgentInput): Promise<AgentReply> {
   const llm = await extractIntentLLM(text).catch(() => null);
 
   let crop = llm?.crop ?? rule.crop ?? input.defaults?.crop;
-  if (crop && !CROP_IDS.has(crop)) crop = undefined; // guard against off-menu crops
+  // Any crop is allowed — fuzzy-resolve aliases/typos to a canonical id; unknown
+  // crops pass through (engine reports "no mandi buying X" if there's no price).
+  if (crop) crop = getCrop(crop).id;
   const quantityQuintals =
     llm?.quantityQuintals ?? rule.quantityQuintals ?? input.defaults?.quantityQuintals;
   const locationText = llm?.locationText ?? rule.locationText;
@@ -165,11 +166,11 @@ function composeHi(r: OpportunityResult, usedFallback: boolean): string {
 function clarify(lang: Lang, needCrop: boolean, needQty: boolean): string {
   if (lang === "hi") {
     if (needCrop && needQty) return "आप कौन सी फसल और कितने क्विंटल बेचना चाहते हैं? (जैसे: लखनऊ में 50 क्विंटल गेहूं)";
-    if (needCrop) return "आप कौन सी फसल बेच रहे हैं — गेहूं, सोयाबीन, चना, प्याज, लहसुन या सरसों?";
+    if (needCrop) return "आप कौन सी फसल बेच रहे हैं? कोई भी फसल लिखें — जैसे धान, गेहूं, आलू, सरसों, अरहर, टमाटर…";
     return "आपके पास कितने क्विंटल हैं?";
   }
   if (needCrop && needQty) return "Which crop and how many quintals are you selling? (e.g. 50 quintal wheat at Lucknow)";
-  if (needCrop) return "Which crop are you selling — wheat, soybean, gram, onion, garlic or mustard?";
+  if (needCrop) return "Which crop are you selling? Type any crop — e.g. paddy, wheat, potato, mustard, arhar, tomato…";
   return "How many quintals do you have?";
 }
 

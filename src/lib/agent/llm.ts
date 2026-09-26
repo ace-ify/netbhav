@@ -44,7 +44,7 @@ function provider(): { base: string; key: string; model: string } | null {
 const SYSTEM_PROMPT =
   "You extract structured intent from an Indian farmer's message (Hindi, English, " +
   "or Hinglish). Reply with STRICT JSON only, no prose: " +
-  '{"crop": <one of ["wheat","soybean","gram","onion","garlic","mustard"] or null>, ' +
+  '{"crop": <the crop as a lowercase English word (e.g. paddy, wheat, potato, mustard, arhar, gram, maize, onion, garlic, tomato, or ANY other crop the farmer names — carrot, methi, bajra, etc.); null if none>, ' +
   '"quantityQuintals": <number in quintals (1 tonne = 10 quintal) or null>, ' +
   '"locationText": <village/town/mandi name as written, or null>, ' +
   '"fpo": <true if bulk/FPO/pooled selling is mentioned, else false>}. ' +

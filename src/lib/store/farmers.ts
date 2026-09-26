@@ -1,8 +1,9 @@
-// Farmer profile store — a tiny JSON file with ATOMIC writes (temp + rename),
-// writes serialized through an in-process queue so concurrent API calls can't
-// corrupt the file or lose updates. Path is env-overridable for tests.
-// ponytail: swap for Turso/Postgres (DATABASE_URL) on serverless deploy — fs is
-// ephemeral there. Single writer per process is the known ceiling.
+// Farmer profile store. Persists to Supabase (PostgREST, no SDK dep) when
+// SUPABASE_URL + SUPABASE_SERVICE_KEY are set — survives serverless restarts on
+// Vercel. Falls back to a local atomic-write JSON file when they're absent
+// (local dev / tests). Whole store lives in one jsonb row (demo-scale simple).
+// ponytail: single kv row + per-process write queue; move to per-farmer rows +
+// row locks if farmer count or write concurrency grows.
 import { promises as fs } from "fs";
 import path from "path";
 import { DEMO_FARMER } from "@/lib/data/mandis";
@@ -82,6 +83,8 @@ function withSeed(store: Store): Store {
 }
 
 async function readStore(): Promise<Store> {
+  const sb = await supabaseRead();
+  if (sb !== null) return sb;
   try {
     const raw = await fs.readFile(storePath(), "utf8");
     const parsed = JSON.parse(raw);
@@ -92,11 +95,51 @@ async function readStore(): Promise<Store> {
 }
 
 async function writeStore(store: Store): Promise<void> {
+  if (await supabaseWrite(store)) return;
   const target = storePath();
   await fs.mkdir(path.dirname(target), { recursive: true });
   const tmp = `${target}.tmp.${process.pid}.${Math.random().toString(36).slice(2)}`;
   await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
   await fs.rename(tmp, target); // atomic on the same filesystem
+}
+
+// ── Supabase (PostgREST) backend — whole store in one jsonb row `key='farmers'`.
+// Table: netbhav_kv(key text primary key, value jsonb). Returns null when
+// Supabase isn't configured so the file fallback kicks in.
+const SB_URL = process.env.SUPABASE_URL;
+const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+function sbEnabled() {
+  return Boolean(SB_URL && SB_KEY);
+}
+function sbHeaders() {
+  return { apikey: SB_KEY as string, Authorization: `Bearer ${SB_KEY}`, "Content-Type": "application/json" };
+}
+async function supabaseRead(): Promise<Store | null> {
+  if (!sbEnabled()) return null;
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/netbhav_kv?key=eq.farmers&select=value`, {
+      headers: sbHeaders(),
+      cache: "no-store",
+    });
+    if (!res.ok) return {};
+    const rows = (await res.json()) as { value: Store }[];
+    return rows[0]?.value ?? {};
+  } catch {
+    return {}; // reachable-but-erroring → treat as empty (seed fills)
+  }
+}
+async function supabaseWrite(store: Store): Promise<boolean> {
+  if (!sbEnabled()) return false;
+  try {
+    await fetch(`${SB_URL}/rest/v1/netbhav_kv`, {
+      method: "POST",
+      headers: { ...sbHeaders(), Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify([{ key: "farmers", value: store }]),
+    });
+    return true;
+  } catch {
+    return true; // configured → don't silently fall back to a stale local file
+  }
 }
 
 // Serialize all read-modify-write mutations so parallel requests don't clobber.

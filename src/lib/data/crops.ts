@@ -16,6 +16,8 @@ export const CROPS: (Crop & { agmarknet: string; aliases?: string[] })[] = [
   { id: "onion", name: { en: "Onion", hi: "प्याज" }, emoji: "🧅", class: "vegetable", storable: true, agmarknet: "Onion", aliases: ["pyaz", "pyaaz", "प्याज", "kanda"] },
   { id: "garlic", name: { en: "Garlic", hi: "लहसुन" }, emoji: "🧄", class: "spice", storable: true, agmarknet: "Garlic", aliases: ["lahsun", "lehsun", "लहसुन"] },
   { id: "tomato", name: { en: "Tomato", hi: "टमाटर" }, emoji: "🍅", class: "vegetable", storable: false, agmarknet: "Tomato", aliases: ["tamatar", "टमाटर"] },
+  { id: "carrot", name: { en: "Carrot", hi: "गाजर" }, emoji: "🥕", class: "vegetable", storable: true, agmarknet: "Carrot", aliases: ["gajar", "gaajar", "गाजर"] },
+  { id: "peas", name: { en: "Peas", hi: "मटर" }, emoji: "🟢", class: "vegetable", storable: false, agmarknet: "Green Peas", aliases: ["matar", "mutter", "मटर"] },
 ];
 
 export const CROP_BY_ID = new Map(CROPS.map((c) => [c.id, c]));

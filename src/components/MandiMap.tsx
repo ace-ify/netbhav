@@ -10,7 +10,7 @@ import { inr, t } from "@/lib/i18n";
 function farmerIcon() {
   return L.divIcon({
     className: "",
-    html: `<div style="background:#1d4ed8;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px #1d4ed8"></div>`,
+    html: `<div style="background:#171717;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px #171717"></div>`,
     iconSize: [16, 16],
     iconAnchor: [8, 8],
   });
@@ -72,23 +72,25 @@ export default function MandiMap({
 
   const maxNet = Math.max(...opps.map((o) => o.netRealization), 1);
   const minNet = Math.min(...opps.map((o) => o.netRealization), 0);
+  // Take-home scale: low → neutral grey, high → emerald (gain). Matches the design tokens.
   const color = (net: number) => {
-    if (maxNet === minNet) return "#3a8340";
+    if (maxNet === minNet) return "#059669";
     const f = (net - minNet) / (maxNet - minNet);
-    const r = Math.round(220 - f * 178);
-    const g = Math.round(90 + f * 70);
-    return `rgb(${r},${g},60)`;
+    const r = Math.round(163 - f * 158); // neutral-400 (163) → emerald-600 (5)
+    const g = Math.round(163 - f * 13); // 163 → 150
+    const b = Math.round(163 - f * 58); // 163 → 105
+    return `rgb(${r},${g},${b})`;
   };
 
   return (
-    <div className="relative h-[340px] w-full overflow-hidden rounded-xl border border-brand-200">
+    <div className="relative h-[340px] w-full overflow-hidden rounded-xl border border-neutral-200">
       <MapContainer center={[farmer.lat, farmer.lng]} zoom={9} className="h-full w-full" scrollWheelZoom={false}>
         <TileLayer attribution="&copy; OpenStreetMap" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <FitBounds points={points} />
 
         {/* Real road route (OSRM) to the selected mandi; faint straight line if routing is down. */}
         {target && route ? (
-          <Polyline positions={route.geometry} pathOptions={{ color: "#c48f00", weight: 4 }} />
+          <Polyline positions={route.geometry} pathOptions={{ color: "#171717", weight: 4 }} />
         ) : target && target.roadKm > 0 ? (
           <Polyline
             positions={[[farmer.lat, farmer.lng], [target.mandi.lat, target.mandi.lng]]}
@@ -109,9 +111,9 @@ export default function MandiMap({
               center={[o.mandi.lat, o.mandi.lng]}
               radius={isBest ? 12 : isSel ? 10 : 7}
               pathOptions={{
-                color: isBest ? "#c48f00" : "#ffffff",
+                color: isBest ? "#ca8a04" : "#ffffff",
                 weight: isBest ? 3 : 1.5,
-                fillColor: isBest ? "#f2b705" : color(o.netRealization),
+                fillColor: isBest ? "#eab308" : color(o.netRealization),
                 fillOpacity: 0.9,
               }}
               eventHandlers={{ click: () => onSelect(o.mandi.id) }}
@@ -128,7 +130,7 @@ export default function MandiMap({
                   {o.roadKm > 0 && o.mandi.id !== (selectedId ?? best?.mandi.id) && (
                     <button
                       onClick={() => onSelect(o.mandi.id)}
-                      className="mt-1 inline-block font-medium text-brand-700 underline"
+                      className="mt-1 inline-block font-medium text-neutral-700 underline"
                     >
                       {lang === "hi" ? "रास्ता दिखाएँ" : "Show route"}
                     </button>
@@ -143,7 +145,7 @@ export default function MandiMap({
       {/* In-platform route summary for the selected mandi (road route drawn above). */}
       {target && target.roadKm > 0 && (
         <div className="absolute bottom-2 left-2 z-[500] flex items-center gap-2 rounded-lg bg-white/95 px-2.5 py-1.5 text-xs shadow">
-          <span className="font-medium text-brand-800">
+          <span className="font-medium text-neutral-800">
             {target.mandi.name}:{" "}
             {route
               ? `${Math.round(route.km)} ${t(lang, "km")} · ${Math.round(route.durationMin)} min`
@@ -151,7 +153,7 @@ export default function MandiMap({
           </span>
           <span
             className={`rounded-full px-2 py-0.5 font-medium ${
-              route ? "bg-brand-600 text-white" : "bg-neutral-200 text-neutral-600"
+              route ? "bg-emerald-600 text-white" : "bg-neutral-200 text-neutral-600"
             }`}
           >
             {route ? (lang === "hi" ? "सड़क मार्ग" : "road") : lang === "hi" ? "अनुमान" : "est."}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MapPin, Loader2, Search, Users } from "lucide-react";
 import type { Lang } from "@/lib/types";
 import { t } from "@/lib/i18n";
@@ -46,6 +46,13 @@ export default function InputPanel({
   );
   const [maxKm, setMaxKm] = useState<number | "">(initial?.maxDistanceKm ?? "");
   const [fpo, setFpo] = useState(Boolean(initial?.fpo));
+  // Re-run the search automatically when FPO/bulk is toggled after a first search,
+  // so the effect on transport + take-home is visible immediately (no re-click).
+  const searched = useRef(false);
+  useEffect(() => {
+    if (searched.current) submit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fpo]);
   const [doorstep, setDoorstep] = useState<number | "">(initial?.doorstepQuotePerQuintal ?? "");
   const [geoBusy, setGeoBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -104,6 +111,7 @@ export default function InputPanel({
       fpo,
       doorstepQuotePerQuintal: doorstep === "" ? undefined : Number(doorstep),
     });
+    searched.current = true;
   }
 
   return (
