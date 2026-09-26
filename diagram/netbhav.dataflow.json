@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "NetBhav price pipeline — sources → honest take-home",
+    "quality_profile": "showcase",
+    "viewBox": [1040, 520],
+    "views": [
+      { "id": "sources", "label": "Cache-first sources", "focus": ["mandiapi", "datagov", "seed", "cache"], "note": "Keyless live prices first, then data.gov.in, then bundled reference — never blocked." },
+      { "id": "compute", "label": "Deterministic compute", "focus": ["cache", "geo", "engine"], "note": "Distance + prices feed the net-realization engine; the LLM never touches a rupee." },
+      { "id": "deliver", "label": "What the farmer sees", "focus": ["engine", "ranked", "verdict", "map"], "note": "One ranked take-home verdict, a SELL/WAIT/MONITOR call, and a map + trend." }
+    ]
+  },
+  "stages": [
+    { "label": "Sources" },
+    { "label": "Cache-first" },
+    { "label": "Net-realization" },
+    { "label": "Deliver" }
+  ],
+  "nodes": [
+    { "id": "mandiapi", "type": "external", "label": "Mandi API", "sublabel": "live + history", "stage": 0, "row": 0, "tag": "no key" },
+    { "id": "datagov", "type": "external", "label": "data.gov.in", "sublabel": "Agmarknet", "stage": 0, "row": 1, "tag": "optional" },
+    { "id": "seed", "type": "database", "label": "Reference seed", "sublabel": "2024-25 bands", "stage": 0, "row": 2, "tag": "fallback" },
+    { "id": "geo", "type": "external", "label": "OSRM / haversine", "sublabel": "road distance", "stage": 2, "row": 0, "tag": "distance" },
+    { "id": "cache", "type": "backend", "label": "Price cache", "sublabel": "3h TTL · merge", "stage": 1, "row": 1, "tag": "freshness" },
+    { "id": "engine", "type": "backend", "label": "Net-Realization", "stage": 2, "row": 1, "tag": "deterministic", "width": 156, "height": 58 },
+    { "id": "ranked", "type": "frontend", "label": "Ranked mandis", "sublabel": "best take-home + ₹Δ", "stage": 3, "row": 0 },
+    { "id": "verdict", "type": "frontend", "label": "Advice", "sublabel": "SELL / WAIT / MONITOR", "stage": 3, "row": 1 },
+    { "id": "map", "type": "frontend", "label": "Map + trend", "sublabel": "Leaflet · 30-day", "stage": 3, "row": 2 }
+  ],
+  "flows": [
+    { "id": "mandi-cache", "from": "mandiapi", "to": "cache", "label": "live", "variant": "emphasis" },
+    { "id": "datagov-cache", "from": "datagov", "to": "cache", "label": "fallback", "variant": "dashed", "labelDy": 14 },
+    { "id": "seed-cache", "from": "seed", "to": "cache", "label": "reference", "variant": "dashed" },
+    { "id": "cache-engine", "from": "cache", "to": "engine", "label": "prices", "variant": "emphasis", "labelDy": 14 },
+    { "id": "geo-engine", "from": "geo", "to": "engine", "label": "road km", "fromSide": "bottom", "toSide": "top", "labelDy": 36 },
+    { "id": "engine-ranked", "from": "engine", "to": "ranked", "label": "ranking", "variant": "emphasis" },
+    { "id": "engine-verdict", "from": "engine", "to": "verdict", "label": "advice", "labelDy": 14 },
+    { "id": "engine-map", "from": "engine", "to": "map", "label": "trend" }
+  ],
+  "cards": [
+    { "dot": "violet", "title": "Cache-first, keyless", "items": ["Live prices need no API key (Mandi API mirror)", "Fallback: data.gov.in → bundled seed; 3-hour freshness", "Every result badged Live / Cached / Reference"] },
+    { "dot": "emerald", "title": "Deterministic core", "items": ["Per mandi: − commission (by crop) − fees − cheapest-vehicle freight − spoilage", "Distance from OSRM, else haversine × road factor", "Ranked by real take-home, not the sticker price"] },
+    { "dot": "cyan", "title": "What the farmer sees", "items": ["Best mandi + ₹ gained vs the naive pick", "SELL / WAIT / MONITOR from real 30-day history", "Map + trend — in Hindi, on any channel"] }
+  ]
+}

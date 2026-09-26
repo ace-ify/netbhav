@@ -1,0 +1,24 @@
+PS-02: Mandi Opportunity Agent
+
+PROBLEM
+Farmers often have to decide where to sell their produce using fragmented mandi price information. A higher market price may not result in higher earnings once transportation and distance are considered.
+
+CHALLENGE
+Build an AI-assisted decision-support tool that takes a farmer's crop, quantity, and location, analyzes market-price information from multiple sources, and identifies potential selling opportunities.
+
+Example: Crop + quantity + location → nearby mandi prices → transport estimation → net realization → opportunity shortlist.
+
+MVP / EXPECTED OUTCOME
+- Farmer/crop profile
+- At least one market-price data source
+- Nearby mandi comparison
+- Transport-cost calculation
+- Net realization comparison
+- Clear opportunity recommendation
+
+BONUS
+- Historical price trends
+- Multiple data sources
+- Map visualization
+- FPO/bulk-selling mode
+- Hindi/Indic language support

@@ -1,0 +1,39 @@
+{
+  "name": "netbhav",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NetBhav — Mandi Opportunity Agent. Ranks nearby mandis by net realization (price minus transport, commission & fees).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "agent": "node --env-file-if-exists=.env.local --import tsx livekit-agent/agent.ts dev",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@livekit/agents": "^1.9.0",
+    "@livekit/components-react": "^2.9.24",
+    "leaflet": "1.9.4",
+    "livekit-client": "^2.22.3",
+    "livekit-server-sdk": "^2.19.1",
+    "lucide-react": "0.400.0",
+    "next": "^14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-leaflet": "4.2.1",
+    "recharts": "2.12.7",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/leaflet": "1.9.12",
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.41",
+    "tailwindcss": "3.4.10",
+    "tsx": "4.16.5",
+    "typescript": "5.5.4"
+  }
+}

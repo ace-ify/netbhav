@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "NetBhav — Mandi Opportunity Agent (PS-02)",
+    "quality_profile": "showcase",
+    "viewBox": [1360, 700],
+    "views": [
+      { "id": "channels", "label": "Reach any farmer", "focus": ["farmer", "pwa", "whatsapp", "voice", "agent"], "note": "Web, WhatsApp, or a real-time voice call — Hindi-first, zero-install." },
+      { "id": "money-math", "label": "Honest net realization", "focus": ["pwa", "api", "agent", "engine"], "note": "The LLM only understands language; the deterministic engine does every rupee." },
+      { "id": "data", "label": "Cache-first data", "focus": ["engine", "mandiapi", "datagov", "seed", "geo"], "note": "Keyless live prices first, then data.gov.in, then bundled reference — never blocked." }
+    ]
+  },
+  "components": [
+    { "id": "farmer", "type": "external", "label": "Farmer", "sublabel": "crop · qty · location", "pos": [60, 350], "size": [150, 66] },
+    { "id": "pwa", "type": "frontend", "label": "Web PWA", "sublabel": "Next.js · React", "pos": [310, 160], "size": [150, 66] },
+    { "id": "whatsapp", "type": "external", "label": "WhatsApp", "sublabel": "Twilio webhook", "pos": [310, 350], "size": [150, 66] },
+    { "id": "voice", "type": "backend", "label": "Voice Call", "sublabel": "LiveKit real-time", "pos": [310, 540], "size": [150, 66] },
+    { "id": "api", "type": "backend", "label": "Next.js API", "sublabel": "/api routes", "pos": [590, 160], "size": [150, 66] },
+    { "id": "agent", "type": "backend", "label": "AI Agent", "sublabel": "Groq · rules · LiveKit", "pos": [590, 350], "size": [150, 66], "tag": "language only" },
+    { "id": "engine", "type": "backend", "label": "Net-Realization Engine", "sublabel": "take-home = gross − costs", "pos": [880, 350], "size": [190, 74], "tag": "deterministic" },
+    { "id": "geo", "type": "external", "label": "Nominatim + OSRM", "sublabel": "geocode · road km", "pos": [880, 545], "size": [190, 66] },
+    { "id": "datagov", "type": "external", "label": "data.gov.in", "sublabel": "Agmarknet (optional)", "pos": [1160, 160], "size": [160, 66] },
+    { "id": "mandiapi", "type": "external", "label": "Mandi API", "sublabel": "keyless live + history", "pos": [1160, 350], "size": [160, 66] },
+    { "id": "seed", "type": "database", "label": "Reference seed", "sublabel": "bundled fallback", "pos": [1160, 545], "size": [160, 66] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Omni-channel · any phone", "wraps": ["pwa", "whatsapp", "voice"] },
+    { "kind": "region", "label": "Cache-first data sources", "wraps": ["datagov", "mandiapi", "seed"] }
+  ],
+  "connections": [
+    { "id": "f-pwa", "from": "farmer", "to": "pwa", "variant": "emphasis" },
+    { "id": "f-wa", "from": "farmer", "to": "whatsapp" },
+    { "id": "f-voice", "from": "farmer", "to": "voice" },
+    { "id": "pwa-api", "from": "pwa", "to": "api", "label": "/opportunity", "variant": "emphasis" },
+    { "id": "pwa-agent", "from": "pwa", "to": "agent", "label": "/chat" },
+    { "id": "wa-agent", "from": "whatsapp", "to": "agent", "label": "webhook", "labelDy": 16 },
+    { "id": "voice-agent", "from": "voice", "to": "agent", "label": "LiveKit" },
+    { "id": "api-engine", "from": "api", "to": "engine", "label": "rank", "variant": "emphasis" },
+    { "id": "agent-engine", "from": "agent", "to": "engine", "label": "tool", "labelDy": 16 },
+    { "id": "engine-mandi", "from": "engine", "to": "mandiapi", "label": "live + history", "variant": "emphasis", "labelDy": 16 },
+    { "id": "engine-datagov", "from": "engine", "to": "datagov", "label": "fallback", "variant": "dashed" },
+    { "id": "engine-seed", "from": "engine", "to": "seed", "label": "reference", "variant": "dashed" },
+    { "id": "engine-geo", "from": "engine", "to": "geo", "label": "geocode + km", "labelDy": 60 }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "The problem (PS-02)", "items": ["A higher mandi price ≠ higher earnings", "Transport, commission & fees are the invisible cost of reaching the mandi"] },
+    { "dot": "emerald", "title": "How it works", "items": ["Crop + quantity + location → nearby mandis", "net = price − commission − mandi fee − hamali − transport − spoilage", "Ranked by take-home + SELL / WAIT / MONITOR advisory"] },
+    { "dot": "violet", "title": "Real, keyless, honest", "items": ["Live prices: Mandi API (no key) → data.gov.in → seed, cache-first", "Deterministic engine; the LLM only does language", "Hindi-first · Leaflet map · 30-day trend · FPO bulk mode"] }
+  ]
+}

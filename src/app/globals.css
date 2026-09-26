@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Segoe UI", system-ui, "Noto Sans Devanagari", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-brand-50 text-brand-900 antialiased;
+}
+
+/* Number readouts should feel weighty and honest. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Leaflet controls shouldn't fight our green UI. */
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+
+@keyframes pop {
+  0% { transform: scale(0.96); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop {
+  animation: pop 0.35s ease-out both;
+}

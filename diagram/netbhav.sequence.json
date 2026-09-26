@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "One ask: \"50 quintal onion near Dewas\"",
+    "quality_profile": "showcase",
+    "viewBox": [1040, 600],
+    "views": [
+      { "id": "understand", "label": "Understand", "focus": ["farmer", "agent", "geo"], "note": "Any channel → the LLM/rule parser turns speech into crop · qty · location." },
+      { "id": "compute", "label": "Compute (deterministic)", "focus": ["agent", "engine", "prices"], "note": "Cache-first live prices, then the engine does every rupee of the net math." },
+      { "id": "reply", "label": "Reply in Hindi", "focus": ["engine", "agent", "farmer"], "note": "One ranked verdict, spoken and shown in the farmer's language." }
+    ]
+  },
+  "participants": [
+    { "id": "farmer", "type": "external", "label": "Farmer", "sublabel": "voice / chat" },
+    { "id": "agent", "type": "backend", "label": "AI Agent", "sublabel": "Groq · rules" },
+    { "id": "geo", "type": "external", "label": "Nominatim", "sublabel": "geocode" },
+    { "id": "engine", "type": "backend", "label": "Engine", "sublabel": "net-realization" },
+    { "id": "prices", "type": "external", "label": "Mandi API", "sublabel": "keyless live" }
+  ],
+  "segments": [
+    { "from": 156, "to": 270, "label": "Understand" },
+    { "from": 270, "to": 388, "label": "Compute · deterministic" },
+    { "from": 388, "to": 486, "label": "Reply in Hindi" }
+  ],
+  "messages": [
+    { "from": "farmer", "to": "agent", "y": 172, "label": "\"50 quintal onion near Dewas\"", "variant": "emphasis", "note": "voice (LiveKit) or chat" },
+    { "from": "agent", "to": "geo", "y": 210, "label": "geocode \"Dewas\"", "note": "LLM/rule → crop·qty·location" },
+    { "from": "geo", "to": "agent", "y": 248, "label": "lat / lng", "variant": "return" },
+    { "from": "agent", "to": "engine", "y": 288, "label": "findBestMandi(onion, 50)", "variant": "emphasis" },
+    { "from": "engine", "to": "prices", "y": 326, "label": "getPrices · cache-first", "note": "live → data.gov.in → seed" },
+    { "from": "prices", "to": "engine", "y": 364, "label": "24 mandis · live modal", "variant": "return" },
+    { "from": "engine", "to": "agent", "y": 410, "label": "best mandi · net ₹ · +Δ · WAIT", "variant": "return", "note": "deterministic: −6% −fees −freight −spoilage · rank" },
+    { "from": "agent", "to": "farmer", "y": 448, "label": "Hindi voice + text", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "agent", "from": 166, "to": 454, "type": "backend" },
+    { "participant": "geo", "from": 204, "to": 254, "type": "external" },
+    { "participant": "engine", "from": 282, "to": 416, "type": "backend" },
+    { "participant": "prices", "from": 320, "to": 370, "type": "external" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "What happens on one ask", "items": ["Farmer speaks or types in Hindi — web, WhatsApp, or voice", "LLM (Groq) or rule parser extracts crop · qty · location"] },
+    { "dot": "emerald", "title": "Deterministic money math", "items": ["Cache-first live prices; fallback data.gov.in → seed", "net = price − commission − fees − freight − spoilage; ranked + advisory"] },
+    { "dot": "violet", "title": "Honest by design", "items": ["The LLM never computes a rupee — only language", "Same engine behind web, WhatsApp and the voice call"] }
+  ]
+}
